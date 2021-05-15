@@ -1,0 +1,30 @@
+﻿(** Verify the select button is enabled or disabled
+@Param SelectButtonEnabled - True if the select button is enabled, false if it is disabled. 
+@Param numberPresent - The number in parenthesis in the select button (number of vaccine groups selected)
+@Handler
+ Run "Immunizations/Common/ChartingDialog/Validation".verifySelectButton selectButtonEnabled, numberPresent**) 
+on verifySelectButton selectButtonEnabled, numberPresent
+	waitfor 10, "Immunizations/Common/DocumentHistory/TL_Dialog"
+	Set rectangle to  "Immunizations/Common/DocumentHistory/Helpers".productSearchRectangle
+	if selectButtonEnabled
+		run "Immunizations/Util/Validation".Verifyimage "Immunizations/Common/ChartingDialog/SelectButton/SelectButtonEnabled", rectangle
+	else 
+		run "Immunizations/Util/Validation".Verifyimage "Immunizations/Common/ChartingDialog/SelectButton/selectButtonDisabled", rectangle
+	end if
+	run "Immunizations/Util/Validation".verifyText "(" & numberPresent & ")", rectangle
+end verifySelectButton
+
+(** Verify the submit button is enabled or disabled
+@Param SubmitButtonEnabled - True if the submit button is enabled, false if it is disabled. 
+@Param numberPresent - The number in parenthesis in the select button (number of vaccine groups selected)
+@Handler
+ Run "Immunizations/Common/ChartingDialog/Validation".verifySubmitButton submitButtonEnabled, numberPresent**) 
+on verifySubmitButton submitButtonEnabled, numberPresent
+	Set rectangle to  "Immunizations/Common/DocumentHistory/Helpers".productSearchRectangle
+	if submitButtonEnabled
+		run "Immunizations/Util/Validation".Verifyimage "Immunizations/Common/ChartingDialog/SubmitButton/Submit_Button_Enabled", rectangle
+	else 
+		run "Immunizations/Util/Validation".Verifyimage "Immunizations/Common/ChartingDialog/SubmitButton/Submit_Button_Disabled", rectangle
+	end if
+	run "Immunizations/Util/Validation".verifyText "(" & numberPresent & ")", rectangle
+end verifySubmitButton

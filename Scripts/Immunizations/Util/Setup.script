@@ -1,0 +1,54 @@
+﻿(** Create a properties list from a resource excel file
+@Param ResourcePath - the path for the excel resource file
+@Param WorkSheet - WorkSheet to be parsed (Usually Domain Name)
+@Param Row - the Row to be parsed
+@Return the parsed PropertiesList
+@Handler
+	"Immunizations/Util/Setup".CreatePropertiesListFromExcelFile(ResourcePath, WorkSheet, Row)
+**) 
+function CreatePropertiesListFromExcelFile ResourcePath, WorkSheet, Row
+	set PropertiesList to item 1 of Workbook(ResourcePath).WorkSheet(WorkSheet).CellRange(Row)
+	join PropertiesList using "|"
+	split PropertiesList using "|" and ":"
+	log "Contents of" && ResourcePath && "for WorkSheet" && WorkSheet && "and Row" && Row && "is" && PropertiesList
+	return PropertiesList
+end CreatePropertiesListFromExcelFile
+
+(** Create a properties list from a resource properties file
+@Param ResourcePath - the path for the excel resource file
+@Return the parsed PropertiesList
+@Handler
+	"Immunizations/Util/Setup".CreatePropertiesListFromPropertiesFile(ResourcePath)
+**) 
+function CreatePropertiesListFromPropertiesFile ResourcePath
+	set PropertiesList to file ResourcePath
+	split PropertiesList by return and ":"
+	log "Contents of" && ResourcePath && "is" && PropertiesList
+	return PropertiesList
+end CreatePropertiesListFromPropertiesFile
+
+(** Calculate step number to use in logs for steps and screen captures to name the file with
+@Handler
+	"Immunizations/Util/Setup".stepNumber
+**) 
+function stepNumber
+	Add 1 to Global stepNumber
+	return "Step " & Global stepNumber & ": "
+end stepNumber
+
+(** Selecting the domain where we need to run the test
+@Handler
+     "Immunizations/Util/Setup".domainRun(domain)
+**)
+function domainRun domain
+	if domain is empty
+		set domain to "S18VX"
+	end if
+	log "Running Test in Domain:" && domain
+	return domain
+End domainRun
+
+
+
+
+

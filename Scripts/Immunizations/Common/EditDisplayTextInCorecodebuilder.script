@@ -1,0 +1,38 @@
+﻿(**
+Changes and saves the display value from the codeset for the specified code value 
+@Param defaultDisplayValue - the exisiting value from the codeset which the user wants to select
+@Param newDisplayValue - the new value which user wants display after the edits  
+@Handler
+     run "Immunizations/Common/editDisplayTextInCorecodeBuilder defaultDisplayValue, newDisplayValue"
+**)
+On editDisplayTextInCorecodeBuilder defaultDisplayValue, newDisplayValue
+	set imgColumnName to "Immunizations/Common/CoreCodeBuilder/ColumnName/ColumnName_Display"
+	
+	//sort columns
+	Click imgColumnName
+	TypeText controlKey & homekey     //Zero State
+	set the searchRectangle to ImageRectangle(imgColumnName) + (0,-5, RemoteScreenSize().x,10)
+	
+	DoubleClick item 1 of EveryImageLocation("Immunizations/Common/CoreCodeBuilder/CoreCodeBuilder_Seperator")
+	
+	put ImageRectangle( imgColumnName).bottomRight + (-100, 0) into SearchArea1
+	put ImageRectangle(imgColumnName).bottomRight + (70, RemoteScreenSize().y) into SearchArea2
+	
+	If ImageFound(text:defaultDisplayValue, SearchRectangle:(SearchArea1, SearchArea2))
+		DoubleClick FoundImageLocation()
+	end if
+	wait 3     // let Code Value Management window get loaded.
+	
+	Typetext windowskey & upArrow	
+	wait 3     // Maximize Code Value Management window and wait for 3 seconds to get window maximized.
+	
+	TypeText homekey & shiftkey & endkey
+	Typetext backspace
+	TypeText newDisplayValue
+	TypeText altKey & "O"
+	
+	WaitFor 10, imgColumnName	
+	
+	set the searchRectangle to ()     // empty the current searchRectangle
+End editDisplayTextInCorecodeBuilder
+

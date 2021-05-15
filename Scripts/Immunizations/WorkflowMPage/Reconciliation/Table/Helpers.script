@@ -1,0 +1,75 @@
+﻿(*
+This Handler sets the column search rectangle for a given vaccine group based on the number of rows within the vaccine group subsection
+@params localRecordTable - boolean - if this is set to true, the rectangle will build off of the local record table. If it is false, the rectangle will build on the outside record table
+@params vaccineName - the name of the vaccine group
+@params numberOfRows - how many rows are in the subsection of the vaccine group (administrations + blank rows)
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows)
+*)
+function vaccineColumnSearchRectangle localRecordTable, vaccineName, numberOfRows
+	if localRecordTable = true
+		set topLeft to imageRectangle(text: "Administration Date", validWords: "Administration Date", SearchRectangle:(item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/TL_header"), item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/BR_header"))).topLeft +(0,-12)   
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)	
+	else 
+		set topLeft to imageRectangle(text: "Administration Date", validWords: "Administration Date", SearchRectangle:("Immunizations/WorkflowMPage/Search/TL_header", "Immunizations/WorkflowMPage/Search/BR_header")).topLeft +(-7,-12)
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, imageLocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)	
+	end if
+	set rectangle to (topLeft, bottomRight)
+	set vaccineRectangle to ImageRectangle(text:vaccineName, SearchRectangle:rectangle, validCharacters: "*" ) + (-20, 20, 120, (32*numberOfRows))
+	return vaccineRectangle
+end vaccineColumnSearchRectangle
+
+(*
+This Handler sets the row search rectangle for a given administration date base on the vaccine group subsection
+@params adminDate - the date of administration within the subsection of the vaccine groups
+@params vaccineName - the name of the vaccine group
+@params numberOfRows - how many rows are in the subsection of the vaccine group (administrations + blank rows)
+@params localRecordTable - boolean - if this is set to true, the rectangle will build off of the local record table. If it is false, the rectangle will build on the outside record table
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, localRecordTable, vaccineName, numberOfRows)
+*)
+function vaccineRowSearchRectangle adminDate, localRecordTable, vaccineName, numberOfRows
+	If adminDate is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		set textRectangle to imageRectangle(image:"Immunizations/Common/DoubleDash", SearchRectangle: vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows))
+	else
+		log  readtext(vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows, validCharacters: "*" ))
+		set textRectangle to imageRectangle(text: adminDate, SearchRectangle: vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows, validCharacters: "*" ))
+	End If
+	set topLeft to (textRectangle.topLeft + (-5,-7))
+	set bottomRight to (imageLocation("Immunizations/WorkflowMPage/Search/BR_header").x, textRectangle.bottomRight.y+8)
+	return(topLeft, bottomRight)
+end vaccineRowSearchRectangle
+
+(*
+this handler sets the rectangle for a given column in either the local or outside record table
+@params localRecordTable - boolean - if this is set to true, the rectangle will build off of the local record table. If it is false, the rectangle will build on the outside record table
+@params header - the name of the column that the rectangle will build off of
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(localRecordTable, header)
+*)
+function columnSearchRectangle localRecordTable, header
+	if localRecordTable = true 
+		set topLeft to imageRectangle(text: header, validWords: header, SearchRectangle:(item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/TL_header"),item 2 of everyimagelocation( "Immunizations/WorkflowMPage/Search/BR_header"))).topLeft +(-5,-12)   
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, item 2 of everyimageLocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)
+	else 
+		set topLeft to imageRectangle(text: header, validWords: header, ignoreSpaces: true,  SearchRectangle:("Immunizations/WorkflowMPage/Search/TL_header", "Immunizations/WorkflowMPage/Search/BR_header")).topLeft +(-5,-12)   
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, imageLocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)
+	end if
+	return (topLeft, bottomRight)
+end columnSearchRectangle
+
+(*
+@params adminDate - the date of administration within the subsection of the vaccine groups
+@params vaccineName - the name of the vaccine group
+@params numberOfRows - how many rows are in the subsection of the vaccine group (administrations + blank rows)
+@params localRecordTable - boolean - if this is set to true, the rectangle will build off of the local record table. If it is false, the rectangle will build on the outside record table
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".localAndOutsideRowSearchRectangle(adminDate, localRecordTable, vaccineName, numberOfRows)
+*)
+function localAndOutsideRowSearchRectangle adminDate, localRecordTable, vaccineName, numberOfRows
+	If adminDate is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		set textRectangle to imageRectangle(image:"Immunizations/Common/DoubleDash", SearchRectangle: vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows))
+	else
+		set textRectangle to imageRectangle(text: adminDate, SearchRectangle: vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows))
+	End If
+	set topLeft to (textRectangle.topLeft + (-5,-7))
+	set bottomRight to (imageLocation("Immunizations/WorkflowMPage/Search/BR_header").x + 600, textRectangle.bottomRight.y+8)
+	log (topLeft, bottomRight)
+	return(topLeft, bottomRight)
+end localAndOutsideRowSearchRectangle

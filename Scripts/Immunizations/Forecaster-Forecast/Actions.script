@@ -1,0 +1,61 @@
+﻿(**Click the vaccine group within the first column to expose expanded view.
+@Handler
+     "Immunizations/Forecaster-Forecast/Actions".clickVaccineName
+**)
+
+On clickVaccineName vaccineName
+	Set rowSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangle(vaccineName)
+	Click text:vaccineName, searchRectangle:rowSearchRectangle
+End clickvaccineName
+
+(**Click the scroll button until it has scrolled all the way to the right.
+@Handler
+     "Immunizations/Forecaster-Forecast/Actions".scrollAllTheWayRight
+**)
+on scrollAllTheWayRight
+	set ScrollBarRightArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarRightArrow")
+	repeat until imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarRight") 
+		Click ScrollBarRightArrow
+	end repeat
+end scrollAllTheWayRight
+
+(**Click the scroll button until it has scrolled all the way to the left.
+@Handler
+     run "Immunizations/Forecaster-Forecast/Actions".scrollToLeft
+**)
+on scrollToLeft
+	Set ScrollBarLeftArrow to "Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow" 
+	if imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow")
+		set  ScrollBarLeftArrow to FoundImageLocation()
+		repeat until imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarLeft")
+			Repeat 2 times
+				click ScrollBarLeftArrow
+			End repeat
+			moveTo ScrollBarLeftArrow + (-50, 0)
+		end repeat
+	end if
+end scrollToLeft 
+
+(**Click the scroll down button one time.
+@Handler
+     run "Immunizations/Forecaster-Forecast/Actions".clickScrollDownArrow
+**)
+on clickScrollDownArrow
+	if imageFound ("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarDownArrow")
+		click imageLocation(Image:"Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarDownArrow",searchRectangle:(imagelocation("Immunizations/Forecaster-Forecast/Common/TL_LowerSection"),imageLocation("Immunizations/Forecaster-Forecast/Common/BR_LowerSection")+(150,0)))
+	end if 
+end clickScrollDownArrow
+
+
+(**Click the More Details button in the expanded view.
+@Handler
+     "Immunizations/Forecaster-Forecast/Actions".clickMoreDetails
+**)
+On clickMoreDetails 
+	Set RightHeaderLocation to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneHeaderSearchRectangle()
+	Click text:"More Details", searchRectangle:RightHeaderLocation
+End clickMoreDetails
+
+
+
+

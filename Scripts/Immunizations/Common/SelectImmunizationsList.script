@@ -1,0 +1,57 @@
+﻿(**Selects the vaccineName group from the Select Immunizations list"productListScroll"
+@Param vaccineName the vaccineName group to be selected
+@Handler run "Immunizations/Common/SelectImmunizationsList".SelectvaccineName vaccineName**)
+On selectVaccineName vaccineName
+	//This loop will repeat until the vaccineName group has been found within the Select Immunizations list, if it is not found it should page down through the list until it is found.
+	Set selectImmunizationsRectangle to imageRectangle(waitFor:10,image:"Immunizations/Common/TL_SelectImmunizations") + (0,20, 400, 520)
+	if vaccineName is in ("Influenza", "Mumps")
+		DoubleClick imageLocation ("Immunizations/Common/TL_SelectImmunizations")+[30,30]
+		ScrollWheelDown 1
+		click item 2 of EveryImageLocation(text:vaccineName, searchRectangle:selectImmunizationsRectangle)
+	else if vaccineName is "Measles"
+		click item 1 of EveryImageLocation(text:vaccineName, searchRectangle:selectImmunizationsRectangle)
+	else if vaccineName is "Rubella"
+		DoubleClick imageLocation ("Immunizations/Common/TL_SelectImmunizations")+(30,30)
+		ScrollWheelDown 7
+		click item 2 of EveryImageLocation(text:vaccineName, searchRectangle:selectImmunizationsRectangle)
+	else
+		repeat until imageFound(10, text:vaccineName, searchRectangle:selectImmunizationsRectangle)
+			DoubleClick imageLocation ("Immunizations/Common/TL_SelectImmunizations")+(30,30)
+			ScrollWheelDown 5
+			log "Could not find vaccineName group"	
+		end repeat
+		wait 1
+		
+		click imageLocation(waitfor:10, text:vaccineName, searchRectangle:selectImmunizationsRectangle)
+	end if
+End selectVaccineName
+
+(**Clicks the Select button in the Select Immunizations list
+@Handler run "Immunizations/Common/SelectImmunizationsList".ClickSelectButton**)
+On ClickSelectButton
+	Set selectImmunizationsRectangle to imageRectangle(waitFor:10,image:"Immunizations/Common/TL_SelectImmunizations") + (0,20, 800, 660)
+	Click (image:"Immunizations/Common/ChartingDialog/SelectButton/SelectButtonEnabled", searchRectangle:selectImmunizationsRectangle)
+End ClickSelectButton
+
+(**Returns the Number of Vaccines selected in the Select Immunizations List
+@Hander run "Immunizations/Common/SelectImmunizationsList".countSelectedVaccineGroup**)
+function countSelectedVaccineGroup
+	Set selectImmunizationsRectangle to imageRectangle(waitFor:10,image:"Immunizations/Common/TL_SelectImmunizations") + (0,20, 400, 660)
+	put imagerectangle(text:"Select",searchrectangle:selectImmunizationsRectangle).topright() into SelectCount
+	put SelectCount + (2,20) into SelectCount
+	return readtext(SelectCount)
+end countSelectedVaccineGroup
+
+(**Returns the search rectangle around the left side of the vaccine when selected
+@Param Text - vaccineName - The vaccineName which is selected
+@Returns the search rectangle around the left side of the vaccine when selected
+@Handler
+ run "Immunizations/Common/SelectImmunizationsList".vaccineSelectedSearchRectangle**)
+function vaccineSelectedSearchRectangle vaccineName
+	Set selectImmunizationsRectangle to imageRectangle(waitFor:10,image:"Immunizations/Common/TL_SelectImmunizations") + (0,20, 400, 660)
+	return (ImageRectangle(text:vaccineName, searchRectangle:selectImmunizationsRectangle).topLeft+(0,-10),ImageRectangle(text:vaccineName, searchRectangle:selectImmunizationsRectangle).bottomLeft+(-50,10))
+end vaccineSelectedSearchRectangle
+
+
+
+

@@ -1,0 +1,167 @@
+﻿(**TaskScript for the Order Immunizations functionality**)
+
+(**
+@param encounterType - Encounter type of the patient (inpatient, outpatient, etc.)
+@param orderableName - Name of the product to be ordered
+@Handler 
+run "Immunizations/Common/orderImmunizations/Task".orderAndSignImmunization orderType, orderableName
+**) 
+On orderAndSignImmunization orderableName, encounterType
+	run "Immunizations/Common/OrderImmunizations/Actions".OpenDialog
+	run "Immunizations/Common/OrderImmunizations/Actions".selectOrderableFromList orderableName, encounterType
+	run "Immunizations/Common/OrderImmunizations/Actions".signOrderable orderableName
+End orderAndSignImmunization
+
+
+(**
+This task orders an immunization, navigates to the MAR, and charts it as an exception. Once this is done, it brings the user back to the Immunizations MPage
+
+This handler requires an additional helper suite:
+#https://github.cerner.com/EggPlant/IPDev-Millennium-MedicationAdministrationRecord
+
+@param orderableName - Name of the product to be ordered
+@param encounterType - Encounter type of the patient (inpatient, outpatient, etc.)
+@param notGivenType - The type of not given charted"S18VX_2012"
+@param notGivenReason - the reason the not given is being charted
+@Param Menu - The Menu used to get to component (i.e. 'Chart')
+@param subMenu - the menu name for our immunizations component (Held in the common JSON)
+@param route - The route of the dose specified in the order sentence tool for the orderableName
+@param dose - The dose amount specified in the order sentence tool for the orderableName
+@Handler 
+run "Immunizations/Common/orderImmunizations/Task".chartExceptionFromMAR orderableName, encounterType, notGivenType, notGivenReason, subMenu, route, dose
+**) 
+On chartExceptionFromMAR orderableName, encounterType, notGivenType, notGivenReason, menu, subMenu, route, dose
+	//Place order in Immunizations component
+	run "Immunizations/Common/orderImmunizations/Task".orderAndSignImmunization orderableName,EncounterType
+	put the time into currentTime
+	//Navigate to the MAR
+	Click Text:"Chart", searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")
+	repeat until imageFound(text:"MAR",validCharacters:"MAR",ignoreSpaces:true,searchRectangle:[imageLocation("Immunizations/Setup/TL_MenuBar")+[0,10],imageLocation ("Immunizations/Setup/BR_MenuBar")+[100,1000]])		
+		click image:"Immunizations/Setup/Menu_ScrollDownArrow", searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(0,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000))
+		wait 5
+		MoveTo imageLocation(image:"Immunizations/Setup/BR_MenuBar")+(20,20)
+		log "Could not find component in menu"
+		exit repeat
+	end repeat
+	click foundimagelocation()
+	wait 2
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+	//chart the Not Given on the MAR using the time of administration
+	RightClick item 2 of  "Medication_Administration_Record/MAR_Screen".IdentifyTask_FromMARSpread ("Scheduled","Task",orderableName,route,dose)
+	Run "Medication_Record_Dev_Common_Utilities/Common_Utilities".SelectOption "Chart Not Done"
+	click imagelocation("Medication_Administration_Record/Chart_Not_Done/Dropdown_Exception")
+	TypeText notGivenType
+	typetext tabKey
+	typeText notGivenReason
+	click "Medication_Record_Dev_Common_images/Icon_Sign"
+	run "Immunizations/Setup".LoadComponentViaPatientChart menu, subMenu
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+End chartExceptionFromMAR
+
+(**
+This task orders an immunization, navigates to the MAR, and charts an admin. idCharactOnce this is done, it brings the user back to the Immunizations MPage
+
+This handler requires an additional helper suite:
+#https://github.cerner.com/EggPlant/IPDev-Millennium-Shared-MedicationAdministrationRecord
+
+@param orderableName - Name of the product to be ordered
+@param encounterType - Encounter type of the patient (inpatient, outpatient, etc.)
+@Param Menu - The Menu used to get to component (i.e. 'Chart')
+@param subMenu - the menu name for our immunizations component (Held in the common JSON)
+@param route - The route of the dose specified in the order sentence tool for the orderableName
+@param dose - The dose amount specified in the order sentence tool for the orderableName
+@param site - The site to chart while documenting admin in the MAR
+@Handler 
+run "Immunizations/Common/orderImmunizations/Task".chartAdminFromMAR orderableName, encounterType, menu, subMenu, route, dose, site
+**) 
+On chartAdminFromMAR orderableName, encounterType, menu, subMenu, route, dose, site
+	//Place order in Immunizations component
+	run "Immunizations/Common/orderImmunizations/Task".orderAndSignImmunization orderableName,EncounterType
+	put the time into currentTime
+	//Navigate to the MAR
+	Click Text:"Chart", searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")
+	repeat until imageFound(image:"Immunizations/Common/OrderImmunizations/MarTextString",searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(0,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000)))
+		click image:"Immunizations/Setup/Menu_ScrollDownArrow", searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(0,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000))
+		wait 5
+		MoveTo imageLocation(image:"Immunizations/Setup/BR_MenuBar")+(20,20)
+		log "Could not find component in menu"	
+	end repeat
+	wait 1
+	click foundimagelocation()
+	wait 2
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+	//chart the Not Given on the MAR using the time of administration
+	RightClick item 2 of  "Medication_Administration_Record/MAR_Screen".IdentifyTask_FromMARSpread ("Scheduled","Task",orderableName,route,dose,FormattedTime("%1I:%M",currentTime),formattedTime ("%1m/%1d/%Y",Today))
+	Run "Medication_Record_Dev_Common_Utilities/Common_Utilities".SelectOption "Chart Details"
+	click imagelocation("Medication_Record_Dev_Common_images/TextBox_Performedby")
+	Repeat 6 times
+		typetext tabKey
+	End repeat
+	typeText site
+	click "Medication_Record_Dev_Common_images/Icon_Sign"
+	run "Immunizations/Setup".LoadComponentViaPatientChart menu, subMenu
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+End chartAdminFromMAR
+
+
+(**
+This task orders an immunization, navigates to the MAR, and charts an admin. Once this is done, it brings the user back to the Immunizations MPage
+
+This handler requires an additional helper suite:
+#https://github.cerner.com/EggPlant/IPDev-Millennium-Shared-MedicationAdministrationRecord
+
+@param orderableName - Name of the product to be ordered
+@param encounterType - Encounter type of the patient (inpatient, outpatient, etc.)
+@Param Menu - The Menu used to get to component (i.e. 'Chart')
+@param subMenu - the menu name for our immunizations component (Held in the common JSON)
+@param route - The route of the dose specified in the order sentence tool for the orderableName
+@param dose - The dose amount specified in the order sentence tool for the orderableName
+@param site - The site to chart while documenting admin in the MAR
+@Handler 
+run "Immunizations/Common/orderImmunizations/Task".chartAdminWithDetailsFromMAR orderableName, encounterType, menu, subMenu, lotNumber, manufacturer, expirationDate, vfc, vis, visPublishedDate, site
+**) 
+On chartAdminWithDetailsFromMAR orderableName, encounterType, menu, subMenu, lotNumber, manufacturer, expirationDate, vfc, vis, visPublishedDate, site
+	//Place order in Immunizations component
+	run "Immunizations/Common/orderImmunizations/Task".orderAndSignImmunization orderableName,EncounterType
+	//Navigate to the MAR
+	Click Text:"Chart", searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")
+	repeat until imageFound(image:"Immunizations/Common/OrderImmunizations/MarTextString",searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(0,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000)))
+		click image:"Immunizations/Setup/Menu_ScrollDownArrow", searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(0,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000))
+		wait 5
+		MoveTo imageLocation(image:"Immunizations/Setup/BR_MenuBar")+(20,20)
+		log "Could not find component in menu"	
+	end repeat
+	wait 1
+	click foundimagelocation()
+	wait 2
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+	//chart the Admin on the MAR using the time of administration
+	set rectangle to imageRectangle("Immunizations/Common/OrderImmunizations/Medications") + (-130, 10, 200, 155)
+	rightClick ImageLocation(text:orderableName, searchRectangle: rectangle) + (225,0)
+	click image: "Immunizations/Common/OrderImmunizations/ChartDetails"
+	Repeat 7 times
+		typetext tabKey
+	End repeat
+	typeText lotNumber
+	typetext tabKey
+	typetext manufacturer
+	typetext tabKey
+	set format to "%m/%d/%Y"
+	typetext formattedTime(format, expirationDate)
+	typetext tabKey
+	typetext vfc
+	typetext tabKey
+	typetext vis
+	typetext tabKey
+	typetext formattedTime(format, visPublishedDate)
+	Repeat 3 times
+		typetext tabKey
+	End repeat
+	typeText site
+	click  "Immunizations/Common/OrderImmunizations/CheckMark"
+	wait 2
+	run "Immunizations/Setup".LoadComponentViaPatientChart menu, subMenu
+	click imagelocation ("Immunizations/Common/Icon_Refresh")
+	
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+End chartAdminWithDetailsFromMAR

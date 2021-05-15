@@ -1,0 +1,198 @@
+﻿(**Verifies the vaccine header information
+@Param localRecordTable - Boolean. If True, the validation will be done in the local record table. If false, it will be done in the outside records table
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfAdmins - the amount of administrations in either the local record table or outside record table
+@Handler 
+             run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyVaccineHeader localRecordTable, vaccineName, numberOfAdmins**)
+on verifyVaccineHeader localRecordTable, vaccineName, numberOfAdmins
+	if localRecordTable = true
+		set topLeft to imageRectangle(text: "Administration Date", validWords: "Administration Date", SearchRectangle:(item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/TL_header"), item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/BR_header"))).topLeft +(0,-12)   
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, item 2 of everyimagelocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)	
+	else 
+		set topLeft to imageRectangle(text: "Administration Date", validWords: "Administration Date", SearchRectangle:("Immunizations/WorkflowMPage/Search/TL_header", "Immunizations/WorkflowMPage/Search/BR_header")).topLeft +(-5,-12)
+		set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, imageLocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)	
+	end if
+	set rectangle to (topLeft, bottomRight)
+	run "Immunizations/Util/Validation".verifyText vaccineName && "(" & numberOfAdmins & ")", rectangle
+end verifyVaccineHeader
+
+(**Verifies Administration date column for date and age
+@Param localRecordTable - Boolean. If True, the validation will be done in the local record table. If false, it will be done in the outside records table
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param adminDate - the administration date of the charted event
+@Param age - the age of the patient at the time of administration
+@Handler 
+             run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyAdministrationDateColumn localRecordTable, vaccineName, numberOfRows, adminDate, age**)
+on verifyAdministrationDateColumn localRecordTable, vaccineName, numberOfRows, adminDate, age
+	set columnSearchRectangle to  "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows)
+	If adminDate is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash",columnSearchRectangle
+	else
+		run "Immunizations/Util/Validation".verifyText adminDate, columnSearchRectangle
+		set pattern to "Immunizations/Util/Date".setPattern(age)
+		run "Immunizations/Util/Validation".verifyTextWithPattern age, pattern, columnSearchRectangle, dpiMin, dpiMax, dpiIncrementalStep	
+	end if
+end verifyAdministrationDateColumn
+
+(**Verifies source column in reconciliation
+@Param adminDate - the administration date of the charted event
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param source - the source of the administration
+@Handler 
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifySourceColumn adminDate, vaccineName, numberOfRows, source**)
+on verifySourceColumn adminDate, vaccineName, numberOfRows, source
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, false, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Originating Source")
+	If source is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else
+		run "Immunizations/Util/Validation".verifyText source,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle) 
+	end if
+end verifySourceColumn
+
+(**Verifies details column 
+@Param adminDate - the administration date of the charted event
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param localRecordTable - Boolean. If True, the validation will be done in the local record table. If false, it will be done in the outside records table
+@Param details - the details of the administration
+@Param commentPresent - Boolean. If true, this indicates there is a comment for that row and thus the comment icon in the detail panel will be validated
+@Handler 
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyDetailsColumn adminDate, vaccineName, numberOfRows, localRecordTable, details, commentPresent**)
+on verifyDetailsColumn adminDate, vaccineName, numberOfRows, localRecordTable, details, commentPresent
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, localRecordTable, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(localRecordTable, "Details")
+	If details contains ("--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else
+		run "Immunizations/Util/Validation".verifyText details,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle) 
+	end if
+	if commentPresent
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Detail_Column/Comment_Icon","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	end if
+end verifyDetailsColumn
+
+(**Verifies updates column
+@Param adminDate - the administration date of the charted event
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param updates - the update of the administration
+@Handler 
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyUpdatesColumn adminDate, vaccineName, numberOfRows, updates**)
+on verifyUpdatesColumn adminDate, vaccineName, numberOfRows, updates
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, false, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Updates")
+	If updates is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else
+		run "Immunizations/Util/Validation".verifyText updates,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle) 
+	end if
+end verifyUpdatesColumn
+
+(**Verifies Last Modified column
+@Param adminDate - the administration date of the charted event
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param lastModified - the last modified date of the administration
+@Handler 
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyLastModifiedColumn adminDate, vaccineName, numberOfRows, lastModified**)
+on verifyLastModifiedColumn adminDate, vaccineName, numberOfRows, lastModified
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, false, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Last Modified")
+	If lastModified is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else
+		run "Immunizations/Util/Validation".verifyText lastModified,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle) 
+	end if
+end verifyLastModifiedColumn
+
+(**Verifies the action column
+@Param adminDate - the administration date of the charted event
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Param localRecordTable - Boolean. If True, the handler will search in the local record table. If false, it will search in the outside record table
+@Param emptyRow - Boolean. If True, this indicates that the row is blank. If false, this indicates that the action column is populauted for that row
+@Param addedOrRejectedRowStatus - This is only needed if the row has been added or rejected. Pass in or "rejected" if that row has been rejected. Pass in "added" if the row has been added.
+@Param notGiven - Boolean. If true, this parameter will ensure the add button does not contain the split button for the given row. 
+@Handler 
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyActionColumn adminDate, vaccineName, numberOfRows, localRecordTable, emptyRow,  notGiven, addedOrRejectedRowStatus**)
+on verifyActionColumn adminDate, vaccineName, numberOfRows, localRecordTable, emptyRow, notGiven, addedOrRejectedRowStatus
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, localRecordTable, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(localRecordTable, "Action")
+	set intersectionRectangle to "Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	if notGiven is empty then set notGiven to false 
+	if emptyRow
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Blank_Row", intersectionRectangle
+	else if "rejected" is in addedOrRejectedRowStatus
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Rejected", intersectionRectangle
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Undo_Button", intersectionRectangle
+	else if "added" is in addedOrRejectedRowStatus
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Added", intersectionRectangle
+	else if localRecordTable
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Local_Record_Table/Action_Column_Button", intersectionRectangle
+	else if notGiven
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Button", intersectionRectangle
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button", intersectionRectangle
+		run "Immunizations/Util/Validation".verifyImageNotVisible "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Split_Button", intersectionRectangle
+	else
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_With_Split_Button", intersectionRectangle
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button", intersectionRectangle
+	end if
+end verifyActionColumn
+
+(**Verifies the action column
+@Param adminDate - the administration date of the charted event
+@Param localRecordTable - Boolean. If True, it will search the local record's corresponding outside record row. If false, it will search the outside record's corresponding local record row
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param numberOfRows - The number of administrations + blank rows for one vaccine group
+@Handler
+              run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyCorrespondingRecordRow adminDate, localRecordTable, vaccineName, numberOfRows**)
+on verifyCorrespondingRecordRow (adminDate, localRecordTable, vaccineName, numberOfRows)
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".localAndOutsideRowSearchRectangle(adminDate, localRecordTable, vaccineName, numberOfRows)
+	if localRecordTable = false
+		set adminColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(true, "Administration Date")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, adminColumnSearchRectangle)
+		set detailsColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(true, "Details")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, detailsColumnSearchRectangle)
+		set actionColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(true, "Action")
+		run "Immunizations/Util/Validation".verifyImage  "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Blank_Row","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, actionColumnSearchRectangle)
+	else 
+		set adminColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, "Administration Date")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, adminColumnSearchRectangle)
+		set sourceColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, " Originating Source")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, sourceColumnSearchRectangle)
+		set detailsColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, "Details")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, detailsColumnSearchRectangle)
+		set updatesColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, "Updates")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, updatesColumnSearchRectangle)
+		set actionColumnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, "Action")
+		run "Immunizations/Util/Validation".verifyImage  "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Blank_Row","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, actionColumnSearchRectangle)
+	end if
+end verifyCorrespondingRecordRow
+
+(**Verifies the given column contains no data (nothing is displayed) and is empty.
+@Param localRecordTable - Boolean. If True, the validation will be done in the local record table. If false, it will be done in the outside records table
+@Param header - The column name/header that should not have any data displayed
+@Handler
+             run "Immunizations/WorkflowMPage/Reconciliation/Table/Validations".verifyEmptyColumn localRecordTable, header
+**)
+On verifyEmptyColumn localRecordTable, header
+	if localRecordTable = true 
+		set rectangle to ImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Local_Record_Header") + (10, 85, 475, 100)
+		if header = "Administration Date"
+			run "Immunizations/Util/Validation".verifyText header, rectangle
+			set columnRectangle to ImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Local_Record_Header") + (-20, 140, 125, 425)
+		end if
+		if header = "Details"
+			run "Immunizations/Util/Validation".verifyText header, rectangle
+			set columnRectangle to ImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Local_Record_Header") + (255, 120, 385, 500)
+		end if
+		if header = "Action"
+			run "Immunizations/Util/Validation".verifyText header, rectangle
+			set columnRectangle to ImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Local_Record_Header") + (495, 125, 480, 505)
+		end if
+		run "Immunizations/Util/Validation".Verifyimage "Immunizations/WorkflowMPage/Reconciliation/Local_Record_Table/Column_empty/Deveng_6.14_2012", columnRectangle
+	end if
+End verifyEmptyColumn

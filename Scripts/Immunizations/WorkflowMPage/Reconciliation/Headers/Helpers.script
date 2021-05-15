@@ -1,0 +1,26 @@
+﻿(*
+This handler builds a rectangle on the filters above the outside records table based on the filter name passed in
+@params filterName - the name of the filter to build the rectangle off of
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Headers/Helpers".filterRectangle(filterName)
+*)
+function filterRectangle(filterName)
+	set rectangle to item 2 of everyImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/Outside_Records_Text") + (-40, 10, 300, 160)
+	if "Maximum Date Range" is in filterName
+		set filterRectangle to ImageRectangle(text:"Maximum Date Range", SearchRectangle: rectangle) + (-10, -5, 10, 65)
+	else if "Records Displaying" is in filterName
+		set filterRectangle to ImageRectangle(text:"Records Displaying", SearchRectangle: rectangle) + (-5, -5, 15, 65)
+	else
+		set filterRectangle to ImageRectangle(text:"Source", SearchRectangle: rectangle) + (-5, -5, 45, 55)
+	end if
+	return (filterRectangle)
+end filterRectangle
+
+(*
+This handler builds a rectangle above the outside records table to verify the banners and error messages
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Headers/Helpers".TopHeaderRectangle
+*)
+function TopHeaderRectangle
+	set TopLeft to imageLocation("Immunizations/WorkflowMPage/Reconciliation/Headers/TL_LeftHeader/Deveng_6.15_2012")
+	set BottomRight to imageLocation("Immunizations/WorkflowMPage/Reconciliation/Headers/BR_RightHeader/Deveng_6.15_2012")
+	return(TopLeft, BottomRight)
+end TopHeaderRectangle

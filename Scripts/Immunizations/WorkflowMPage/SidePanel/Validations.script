@@ -1,0 +1,309 @@
+﻿(**Retrieves image from the side panel and returns either a success or failure depending on whether the expected value is observed.
+@Param Button used for the modify button in the side panel for enable validation
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyModifyButtonEnabled button, sidePanelHeaderRectangle**)
+On VerifyModifyButtonEnabled button, sidePanelHeaderRectangle
+	If button is "Immunizations/WorkflowMPage/SidePanel/Button_ModifyEnabled"
+		run "Immunizations/Util/Validation".verifyImage button, sidePanelHeaderRectangle
+	End If
+End VerifyModifyButtonEnabled
+
+(**Retrieves image from the side panel and returns either a success or failure depending on whether the expected value is observed.
+@Param Button used for the modify button in the side panel for disable validation
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyModifyButtonDisabled button, sidePanelHeaderRectangle**)
+On VerifyModifyButtonDisabled button, sidePanelHeaderRectangle
+	If button is "Immunizations/WorkflowMPage/SidePanel/Button_ModifyDisabled"
+		run "Immunizations/Util/Validation".verifyImage button, sidePanelHeaderRectangle
+	End If
+End VerifyModifyButtonDisabled
+
+(**Retrieves image from the side panel and returns either a success or failure depending on whether the expected value is observed.
+@Param Button used for the unchart button in the side panel for enable validation
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyUnchartButtonEnabled button, sidePanelHeaderRectangle**)
+On VerifyUnchartButtonEnabled button, sidePanelHeaderRectangle
+	If button is "Immunizations/WorkflowMPage/SidePanel/Button_UnchartEnabled"
+		run "Immunizations/Util/Validation".verifyImage button, sidePanelHeaderRectangle
+	End if
+End VerifyUnchartButtonEnabled
+
+(**Retrieves image from the side panel and returns either a success or failure depending on whether the View Details link is enabled and displayed.
+@Param link - link image for View Details being enabled to validate
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyViewDetailsLinkEnabled link, sidePanelHeaderRectangle**)
+On VerifyViewDetailsLinkEnabled link, sidePanelHeaderRectangle
+	If link is "Immunizations/WorkflowMPage/SidePanel/Link_ViewDetailsEnabled"
+		run "Immunizations/Util/Validation".verifyImage link, sidePanelHeaderRectangle
+	End if
+End VerifyViewDetailsLinkEnabled
+
+(**Retrieves text from the side panel and returns either a success or failure depending on whether the side panel is open and the correct vaccineName group is displayed.
+@Param vaccineName the vaccineName group that should display in the side panel
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyvaccineNameGroup vaccineName, sidePanelHeaderRectangle**)
+On verifyVaccineNameGroup vaccineName, sidePanelHeaderRectangle
+	run  "Immunizations/Util/Validation".verifyText vaccineName, sidePanelHeaderRectangle
+End verifyVaccineNameGroup
+
+(**Uses an text to verify all columns for the Immunizations component displays.
+@Param vaccineName the vaccineName group that should display in the side panel
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyFirstComponentSquishBehavior**)
+On VerifyFirstComponentSquishBehavior vaccineName
+	run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyvaccineNameGroup, vaccineName
+	set rectangle to (imageLocation("Immunizations/WorkflowMPage/Table/TL_PlusSignDropDown"),imageLocation("Immunizations/WorkflowMPage/Table/BR_PlusSignDropDown"))
+	run  "Immunizations/Util/Validation".verifyText "Last Action Date", rectangle
+End VerifyFirstComponentSquishBehavior
+
+(**Uses an image for the second component refresh button to verify all columns for the second component displays.
+@Param vaccineName the vaccineName group that should display in the side panel
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifySecondComponentSquishBehavior**)
+On VerifySecondComponentSquishBehavior vaccineName
+	run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyvaccineNameGroup, vaccineName
+	set rectangle to (imageLocation("Immunizations/WorkflowMPage/Table/TL_SecondComponent"),imageLocation("Immunizations/WorkflowMPage/Table/BR_SecondComponent"))
+	run  "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Table/ComponentRefresh", rectangle
+End VerifySecondComponentSquishBehavior
+
+(**Uses text to verify the correct last action and last action date displays and an image to verify when there is no last action taken.
+@Param LastAction the last charted action for the vaccineName that should display
+@Param LastActionDate the date the last action was charted for the vaccineName that should display
+@Age the age of the patient at the time the event was charted
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyMostRecentLastActionAndLastActionDate lastAction, lastActionDate, age, rectangle**)
+On VerifyMostRecentLastActionAndLastActionDate lastAction, lastActionDate, age, rectangle
+	Set rectangle to (imagelocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"),imagelocation("Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))
+	If LastAction is "Administered"
+		Set LastActionDate to the abbreviated monthName of LastActionDate && formattedTime("%d,", LastActionDate) && year of LastActionDate
+		run  "Immunizations/Util/Validation".verifyText LastActionDate &&"("&Age&")"&&"-" && LastAction,rectangle
+		run  "Immunizations/Util/Validation".verifyTextNotVisible "Did Not Count", rectangle
+	Else if LastAction is in ("0","Immunizations/Common/DoubleDash","")
+		run  "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/SidePanel/NoVaccineHistory", rectangle
+	Else
+		Set LastActionDate to the abbreviated monthName of LastActionDate && formattedTime("%d,", LastActionDate) && year of LastActionDate
+		run  "Immunizations/Util/Validation".verifyText LastActionDate &&"("&Age&")"&&"-" && LastAction,rectangle
+	End if
+End VerifyMostRecentLastActionAndLastActionDate
+
+(**Uses text to verify the correct Next Recommended Date
+@Param NextRecommendedDate the valid date range for the Vaccine that should display
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyValidNextRecommendedDate nextRecommendedDate, sidePanelHeaderRectangle**)
+On VerifyValidNextRecommendedDate nextRecommendedDate, sidePanelHeaderRectangle
+	If NextRecommendedDate is in ("0", "Immunizations/Common/DoubleDash", "", "- -", "--")
+		run  "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash" , sidePanelHeaderRectangle
+	Else if NextRecommendedDate is "Today"
+		run  "Immunizations/Util/Validation".verifyText NextRecommendedDate ,sidePanelHeaderRectangle
+	else
+		run  "Immunizations/Util/Validation".verifyText uppercase(NextRecommendedDate) ,sidePanelHeaderRectangle
+	End if
+End VerifyValidNextRecommendedDate
+
+(**Uses text to verify the correct status.
+@Param Status the valid Status for the Vaccine that should display
+@Param sidePanelHeaderRectangle - search rectangle for side panel header area
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyValidStatus status, sidePanelHeaderRectangle**)
+On VerifyValidStatus status, sidePanelHeaderRectangle
+	If Status is in ("0", "Immunizations/Common/DoubleDash", "", "- -", "--")
+		run  "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash" , sidePanelHeaderRectangle
+	Else 
+		run  "Immunizations/Util/Validation".verifyText status, sidePanelHeaderRectangle
+	End if
+End VerifyValidStatus
+
+(**Uses text to find the value for the Documented By field, stores it in a variable to read the value and checks to verify the correct user is displayed.
+@Param User the user who charted the event
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyMostRecentDocumentedBy user**)
+On VerifyMostRecentDocumentedBy user
+	put ReadText(imageLocation(Text:"Documented By", SearchRectangle:("Immunizations/WorkflowMPage/SidePanel/TL_Window","Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))+(0,20)) into Validation
+	//Checks to ensure variable value is correct and provide appropriate log message
+	If Validation equals User
+		LogSuccess "Correct user displays"
+	else
+		LogError "Incorrect user displays or the side panel is not displayed"
+	End if
+End VerifyMostRecentDocumentedBy
+
+(**Uses text to find the value for the Not Given Type field, stores it in a variable to read the value and checks to verify the correct type is displayed.
+@Param NotGivenType the not given type selected when charting or is automatically passed in based on where it was charted from (e.g. MAR charted not givens display "Not Given")
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyNotGivenType notGivenType**)
+On VerifyNotGivenType notGivenType
+	put ReadText(imageLocation(Text:"Not Given Type", SearchRectangle:("Immunizations/WorkflowMPage/SidePanel/TL_Window","Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))+(0,20)) into Validation
+	//Checks to ensure variable value is correct and provide appropriate log message
+	If Validation equals NotGivenType
+		LogSuccess "Correct not given type displays"
+	else
+		LogError "Incorrect not given type displays or the side panel is not displayed"
+	End if
+End VerifyNotGivenType
+
+(**Uses text to find the value for the Not Given Reason field, stores it in a variable to read the value and checks to verify the correct type is displayed.
+@Param NotGivenReason the not given reason selected when charting
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyNotGivenReason notGivenReason**)
+On VerifyNotGivenReason notGivenReason
+	Set rectangle to (ImageLocation(Text:"Not Given Reason", SearchRectangle:("Immunizations/WorkflowMPage/SidePanel/TL_Window","Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))+(-60,-20),ImageLocation(Text:"Not Given Reason", SearchRectangle:("Immunizations/WorkflowMPage/SidePanel/TL_Window","Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))+(-60,-20)+(120,50))
+	run "Immunizations/Util/Validation".verifyText notGivenReason, rectangle
+End VerifyNotGivenReason
+
+(**Uses test to find the value for the comment field, stores it in a variable to read the value and checks to verify the correct user is displayed.
+@Param comment enterers while charting the chartnotgiven event
+@Param User the user who charted the event
+the date the last action was charted for the vaccineName that should display
+@Param chartedDate the date the not given was charted (actual date not the date entered when charting)
+@Param format the date format for the chartedDate
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyMostRecentComment comment, user, chartedDate, format**)
+On VerifyMostRecentComment comment, user, chartedDate, format
+	Set rectangle to (ImageLocation(Text:"Documented by", SearchRectangle:("Immunizations/WorkflowMPage/SidePanel/TL_Window","Immunizations/WorkflowMPage/SidePanel/BR_FirstEvent"))+(-50,70),FoundImageLocation()+(300,150))
+	Set chartedDate to FormattedTime(format, chartedDate)
+	run "Immunizations/Util/Validation".verifyText comment &return& user && "|", rectangle
+	run "Immunizations/Util/Validation".verifyText uppercase(chartedDate), rectangle
+End VerifyMostRecentComment
+
+(**Uses field label with text and index to validate the field value
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text the field value selected when charting
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".verifyFieldValue index, label, sidePanelRectangle, text**)
+On verifyFieldValue  index, label, sidePanelRectangle, text
+	Set rectangle to (item index of everyImageLocation(Text:label, SearchRectangle:(sidePanelRectangle))+(-50,0),item index of everyImageLocation(Text:label, SearchRectangle:(sidePanelRectangle))+(300,40))
+	If text is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash",rectangle
+	else
+		run "Immunizations/Util/Validation".verifyText text, rectangle
+	end if 
+End verifyFieldValue
+
+(**Uses field label with text and index to validate the field value for smaller sized fields
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text - The text value needing validateds
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".verifySmallFieldValue  index, label, sidePanelRectangle, text**)
+On verifySmallFieldValue  index, label, sidePanelRectangle, text
+	if number of characters in label is greater than 11
+		set rectangle to (item index of EveryImageRectangle(Text:label, SearchRectangle:(sidePanelRectangle))+(-10,13,80,35))
+	else
+		set rectangle to (item index of EveryImageRectangle(Text:label, SearchRectangle:(sidePanelRectangle))+(-5,15,120,35))
+	end if
+	If text is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash",rectangle
+	else
+		run "Immunizations/Util/Validation".verifyText text, rectangle
+	end if 
+End verifySmallFieldValue
+
+(**Uses field label with text and index to validate the field value for smaller sized fields
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text - The text value needing validateds
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".verifyLargeFieldValue index, label, sidePanelRectangle, text**)
+On verifyLargeFieldValue  index, label, sidePanelRectangle, text
+	set rectangle to (item index of EveryImageRectangle(Text:label, SearchRectangle:(sidePanelRectangle))+(-20,15,310,100))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+End verifyLargeFieldValue
+
+(**Uses field label with text and index to validate the field value
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param image the field value selected when charting
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".verifyFieldValue index, label, sidePanelRectangle, image**)
+On verifyFieldValueImage index, label, sidePanelRectangle, image
+	Set rectangle to (item index of everyImageLocation(Text:label, SearchRectangle:(sidePanelRectangle))+(-50,0),item index of everyImageLocation(Text:label, SearchRectangle:(sidePanelRectangle))+(250,45))
+	run "Immunizations/Util/Validation".verifyImage image, rectangle
+End verifyFieldValueImage
+
+(**Uses field label with text and index to validate the field value
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param fieldLabel the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text the field value selected when charting
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".lastActionWithIndex  index, fieldLabel, sidePanelRectangle, text**)
+On lastActionWithIndex index, fieldLabel, sidePanelRectangle, text
+	Set rectangle to (item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(-50,-50),item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(350,0))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+End lastActionWithIndex
+
+(**Uses field label with text and index to validate the field value
+@Param vaccineName the vaccineName group that should display in the side panel
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param fieldLabel the field label you are wanting to validate
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".verifyDidNotCountImage index, fieldLabel, sidePanelRectangle**)
+On verifyDidNotCountImage index, fieldLabel, sidePanelRectangle
+	Set Rectangle to (item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(-50,-50),item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(325,0))
+	run "Immunizations/Util/Validation".Verifyimage "Immunizations/Common/DidNotCount", Rectangle
+End verifyDidNotCountImage
+
+(**Validates the buttons status (enabled or diabled) in the side panel and logs success and error msg accordingly.
+@Param Button: Button name which has to be verified Ex: Modify/Unchart/Save/Cancel
+@Param Status: Button's status which has to be verified .Ex: Enabled/disabled
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifySidePanelButtonStatus**)
+On VerifySidePanelButtonStatus Button, Status
+	Set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle
+	If Button = Save and Status = Disabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_SaveDisabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else if Button = Save and Status = Enabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_SaveEnabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else if Button = Modify and Status = Enabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_ModifyEnabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else if Button = Modify and Status = Disabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_ModifyDisabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else if Button = Unchart and Status = Enabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_UnchartEnabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else if Button = Cancel and Status = Enabled
+		If ImageFound("Immunizations/WorkflowMPage/SidePanel/Button_CancelEnabled")
+			LogSuccess Button & " is " & Status
+		Else
+			LogError Button & " is not " & Status
+		End If
+	Else
+		LogError "Wrong Input"
+	End If
+End VerifySidePanelButtonStatus
+
+(**Validates if the field value is empty
+@Param vaccineName the vaccineName group that should display in the side panel
+@Param Field is the field label which has to be verified
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyEmptyField**)
+On VerifyEmptyField vaccineName,Field
+	run "Immunizations/WorkflowMPage/SidePanel/Validations".VerifyvaccineNameGroup, vaccineName
+	Put (imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"), imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window") + (400,800)) into Rectangle
+	Put ReadText(item 1 of EveryImageLocation(Text:Field,SearchRectangle:Rectangle) + (0,25)) into Validation
+	Run "Immunizations/Util/Validation".verifyEmptyText Validation
+End VerifyEmptyField
+
+(**Uses field label with text and index to validate the field value. This is a very rare scenario where the side panel last action has the did not count Icon and the last action spills into a new line. This cannot be an  update to the original handler because in all likelihood it would break other tests.
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param fieldLabel the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text the field value selected when charting
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Validations".lastActionWithIndex index, fieldLabel, text**)
+on lastActionWithIndexLineBreak index, fieldLabel, sidePanelRectangle, text
+	Set rectangle to (item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(-20,-60),item index of everyImageLocation(Text:fieldLabel, SearchRectangle:(sidePanelRectangle))+(350,0))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+end lastActionWithIndexLineBreak

@@ -1,0 +1,28 @@
+﻿
+(**TaskScript for the unchart functionality**)
+(**Clicking on Unchart button
+@param SidePanelRectangle for setting the bottom right and top left images of the Side Panel
+@param AuthorizedDate when charted the event with that date
+@param NewDate for the customized date
+@param UnchartReason for entering the reason for uncharting the event
+@param Index used for uncharting the events according to the index selected
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Task".unchart authorizedDate,index,unchartReason**)
+
+On unchart authorizedDate,index,unchartReason
+	run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickUnchart authorizedDate,index,unchartReason
+	run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickSave 
+End unchart
+
+(**Modifying the administration date
+@param adminDate the modified administration date to type when modifying
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Task".modifyAdminDate adminDate,index,dateFormat,modifiedAdminDate**)
+on modifyAdminDate adminDate,index,dateFormat,modifiedAdminDate
+	run "Immunizations/WorkFlowMPage/SidePanel/Actions".clickModify adminDate,index
+	run "Immunizations/WorkFlowMPage/SidePanel/Actions".modifyAdminDate dateFormat,modifiedAdminDate
+	run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickSave 
+	If not imageFound(image:"Immunizations/WorkflowMPage/Table/Button/PlusSign")
+		run "Immunizations/Common/Actions".temporaryRefreshClick  //ISSUE: https://jira2.cerner.com/browse/HMDEV-1204, once the issue is resolved will remove the below script
+	else
+		wait 15
+	end if
+end modifyAdminDate

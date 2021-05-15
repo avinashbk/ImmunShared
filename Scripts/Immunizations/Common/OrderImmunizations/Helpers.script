@@ -1,0 +1,15 @@
+﻿(**Returns the search rectangle of the Order Immunizations dialog
+@Handler 
+set rectangle to "Immunizations/Common/OrderImmunizations/Helpers".DialogSearchRectangle
+**)
+function DialogSearchRectangle
+	return ImageRectangle("Immunizations/Common/OrderImmunizations/OrderImmunizationsDialogHeader") + (-100, -30, 680, 440)
+End DialogSearchRectangle
+
+(**Returns the search rectangle of the Order Immunizations dialog
+@Handler 
+set rectangle to "Immunizations/Common/OrderImmunizations/Helpers".orderSignatureSearchRectangle
+**)
+function orderSignatureSearchRectangle
+	return ImageRectangle("Immunizations/Common/OrderImmunizations/OrdersForSignature") + (-60, -10, 520, 280)
+End orderSignatureSearchRectangle

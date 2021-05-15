@@ -1,0 +1,480 @@
+﻿(** Return the search rectangle that contains the dose search rectangle
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".expandedViewDoseSearchRectangle()
+**)
+function expandedViewDoseSearchRectangle 
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_LeftPane") + (-20, 10), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_LeftPane") + (-245, 0))
+end expandedViewDoseSearchRectangle 
+
+(** Return the search rectangle for the did not count icon to be used in expandedViewLeftPaneDidNotCountSearchRectangle handler
+@Return the coordinates of a search rectangle
+@Handler   
+"Immunizations/Forecaster-Forecast/Helpers".expandedViewDidNotCountIconSearchRectangle()
+**)
+function expandedViewDidNotCountIconSearchRectangle 
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_LeftPane") + (-20, 10), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_LeftPane") + (-230, 0))
+end expandedViewDidNotCountIconSearchRectangle 
+
+(** Return the search rectangle that contains the left pane search rectangle for a given dose
+@Param Text - The dose number you are wanting the search rectangle drawn for
+@Return the coordinates of a search rectangle
+@Handler 
+"Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneDoseSearchRectangle text
+**)
+function expandedViewLeftPaneDoseSearchRectangle text
+	Set Rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewDoseSearchRectangle()
+	return (imageLocation(text:text,searchRectangle:Rectangle)+(7,-20), imageLocation(text:text,searchRectangle:Rectangle)+(275,25))
+end expandedViewLeftPaneDoseSearchRectangle
+
+(** Return the search rectangle that contains the left pane search rectangle for an administration that did not count
+@Param index - the index of the did not count icon (for when multiple doses that did not count exist)
+@Return the coordinates of a search rectangle
+@Handler   "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneDidNotCountSearchRectangle(index)
+**)
+function expandedViewLeftPaneDidNotCountSearchRectangle index
+	Set Rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewDidNotCountIconSearchRectangle()
+	return (item index of everyimagelocation(image:"Immunizations/Common/DidNotCount",searchRectangle:rectangle)+(10,-20), item index of everyimagelocation(image:"Immunizations/Common/DidNotCount",searchRectangle:rectangle)+(260,25))
+end expandedViewLeftPaneDidNotCountSearchRectangle
+
+(** Return the search rectangle that contains the left pane search rectangle for an uncharted record
+@Param index - the index of the did not count icon (for when multiple doses that did not count exist)
+@Return the coordinates of a search rectangle
+@Handler "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneUnchartedRecordSearchRectangle(index)
+**)
+function expandedViewLeftPaneUnchartedRecordSearchRectangle index
+	Set Rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneSearchRectangle()
+	return (item index of everyimagelocation(text:"Uncharted",searchRectangle:Rectangle)+(-50,-20), item index of everyimagelocation(text:"Uncharted",searchRectangle:Rectangle)+(200,25))
+end expandedViewLeftPaneUnchartedRecordSearchRectangle
+
+(** Return the search rectangle that contains the expanded view left search rectangle
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneSearchRectangle()
+**)
+function expandedViewLeftPaneSearchRectangle 
+	set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_LeftPane")
+	set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_LeftPane")
+	return(TopLeft, BottomRight)
+end expandedViewLeftPaneSearchRectangle
+
+(** Return the search rectangle that contains the expanded view left pane header search rectangle
+@Return the coordinates of a search rectangle
+@Handler
+ "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneHeaderSearchRectangle()
+**)
+function expandedViewLeftPaneHeaderSearchRectangle
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_TopPane"), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_TopPane"))
+end expandedViewLeftPaneHeaderSearchRectangle
+
+(** Return the search rectangle that contains the expanded view right pane header search rectangle
+@Return the coordinates of a search rectangle
+@Handler  "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneHeaderSearchRectangle()
+**)
+function expandedViewRightPaneHeaderSearchRectangle
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_TopPane")+(260,0), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_TopPane")+(1600,0))
+end expandedViewRightPaneHeaderSearchRectangle
+
+(** Return the search rectangle that contains the body of right pane search rectangle
+@Return the coordinates of a search rectangle for the right pane body
+@Handler     "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+**)
+function expandedViewRightPaneBodySearchRectangle 
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_RightPane") + (0,40), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_RightPane") + (5, 0))
+end expandedViewRightPaneBodySearchRectangle 
+
+(** Return the search rectangle that contains the right pane search rectangle
+@Return the coordinates of a search rectangle for the entire right pane
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneSearchRectangle()
+**)
+function expandedViewRightPaneSearchRectangle 
+	return (imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/TL_RightPane"), imageLocation("Immunizations/Forecaster-Forecast/ExpandedView/BR_RightPane"))
+end expandedViewRightPaneSearchRectangle
+
+(** Return the search rectangle that contains the left pane search rectangle for a given unknown administration when it sits above or below a dose (e.g. unknown admin is displayed in expanded view above dose 1 forecast)
+@Param Text - The dose number you are wanting the search rectangle drawn above or below
+@Param x1 - The x value for the first offset
+@Param y1 - The y value for the first offset
+@Param x2 - The x value for the second offset
+@Param y2 - The y value for the second offset
+@Return the coordinates of a search rectangle
+@Handler 
+"Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneUnknownAdminSearchRectangle (text, x1, y1, x2, y2)
+**)
+function expandedViewLeftPaneUnknownAdminSearchRectangle text, x1, y1, x2, y2
+	Set Rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewDoseSearchRectangle()
+	return (imageLocation(text:text,searchRectangle:Rectangle)+(x1,y1), imageLocation(text:text,searchRectangle:Rectangle)+(x2,y2))
+end expandedViewLeftPaneUnknownAdminSearchRectangle
+
+(** ONLY TO BE USED FOR TROUBLESHOOTING AT THIS POINT IN TIME - Return the search rectangle for fields in expanded view
+@Param index - The index of the field you are wanting to validate (EggPlant reads right to left so if there are two lines, this will need accounted for, e.g. "Source" for administrations will have an index of 7)
+@Return the coordinates of a search rectangle
+@Handler 
+     "Immunizations/Forecaster-Forecast/Helpers".troubleshootExpandedViewSearchRectangle(index)
+**)
+function troubleshootExpandedViewSearchRectangle index
+	set rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	return (item index of everyimagelocation(image:"Immunizations/Forecaster-Forecast/ExpandedView/Colon", SearchRectangle:(rectangle))+(-150,-10),item index of everyimagelocation(image:"Immunizations/Forecaster-Forecast/ExpandedView/Colon", SearchRectangle:(rectangle))+(400,10))
+end troubleshootExpandedViewSearchRectangle
+
+
+(** Helper function for verifying text present in a given rectangle. This function can be called inside a handler, but not in a VR.
+@Param text - the text value to search for
+@Param rectangle - the area to search for the text in
+@Param returnRectangleFlag - (Optional) If set to TRUE function will return imageRectangle when the text is found, else If set to FALSE/EMPTY it will return if the text is found or not.
+@Return true/false - true if the text is found with the combination of properties, false if the text is not found
+@Handler
+	"Immunizations/Forecaster-Forecast/Helpers".imageFoundTextEnhanced(text, rectangle,returnRectangleFlag)
+**)
+function imageFoundTextEnhanced text, rectangle, returnRectangleFlag
+	if  ( imageFound(text: text, SearchRectangle: rectangle,  ignoreSpaces:"true", EnableAggressiveTextExtraction:"Yes" ) )
+		Log "Found" && text && " without DPI."
+		if returnRectangleFlag is in [empty, false, "", 0]
+			return true
+		else
+			return imageRectangle(text: text, SearchRectangle: rectangle, ignoreSpaces:"true", EnableAggressiveTextExtraction:"Yes" )
+		end if
+		
+	else
+		set currDPIList to "Immunizations/Util/Validation".helper_findTextWithVariableDPI(text, rectangle, 100, 250, 50, "Immunizations/Util/Date".setPattern(text))
+		if item 1 of currDPIList
+			Log "Found" && text && " with DPI =" && item 2 of currDPIList
+			if returnRectangleFlag is in [empty, false, "", 0]
+				return true
+			else
+				return imageRectangle(text: text, SearchRectangle: rectangle, DPI:item 2 of currDPIList, ignoreSpaces:"true", EnableAggressiveTextExtraction:"Yes", validPattern:"Immunizations/Util/Date".setPattern(text) )
+			end if
+		else
+			return false
+		end if
+		
+	end if
+end imageFoundTextEnhanced
+
+(** Return the search rectangle that contains the entire column  given the column Header
+@Param startDateHeader - The first Header of the column to draw out the search rectangle with
+@Param endDateHeader - The second Header of the column to draw out the search rectangle with
+@Param topOffSet1 - The first top offset for the cell to validate against
+@Param topOffSet2 - The second top offset for the cell to validate against
+@Param bottomOffSet1 - The first bottom offset for the cell to validate against
+@Param bottomOffSet2 - The second bottom offset for the cell to validate against
+@Param format - the date format
+@Return the coordinates of a search rectangle
+@Usage Examples: 
+1. set alignment to ("Center","Center")
+	set (topOffset1, topOffset2, bottomOffSet1, bottomOffSet2) to "Immunizations/Forecaster-Forecast/Helpers".columnHeaderAlignment(alignment)
+	set columnSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangle(startDateHeader, endDateHeader, topOffset1, topOffset2, bottomOffSet1, bottomOffSet2)
+2. set columnSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangle(startDateHeader,endDateHeader, "-75", "-90", "75", "600") - NOTE:  This should only be hardcoded if handler columnHeaderAlignment cannot be used (please see handler for all possible inputs)
+@Handler   
+      "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangle(startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2)
+**)
+function columnSearchRectangle startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2, format
+	if startDateHeader contains "," and endDateHeader contains ","	
+		set startDateHeader to uppercase(startDateHeader)
+		set endDateHeader to uppercase(endDateHeader)
+	else if startDateHeader does not contain "," and endDateHeader does not contain ","
+		set startDateHeader to lowercase(startDateHeader)
+		set endDateHeader to lowercase(endDateHeader)
+	end if
+	set (TopLeft, BottomRight) to "Immunizations/Forecaster-Forecast/Helpers".setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+	
+	set ScrollBarLeftArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow")
+	set ScrollBarRightArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarRightArrow")
+	
+	//Adjust the logic for Headers because of grey text on grey Background
+	
+	repeat until ( imageFoundTextEnhanced(startDateHeader, [TopLeft, BottomRight]) and imageFoundTextEnhanced(endDateHeader, [TopLeft, BottomRight]) )
+		click ScrollBarRightArrow
+		click ScrollBarRightArrow
+		click ScrollBarRightArrow
+		MoveTo (0,0)
+		
+		if( imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarRight")) and (not imageFoundTextEnhanced( startDateHeader, [TopLeft, BottomRight]) or (not imageFoundTextEnhanced( endDateHeader, [TopLeft, BottomRight])))
+			logWarning "Scrolled to the extreme Right in the Forecaster View"
+			repeat until (imageFoundTextEnhanced(startDateHeader, [TopLeft, BottomRight]) and (imageFoundTextEnhanced(endDateHeader, [TopLeft, BottomRight])))
+				click ScrollBarLeftArrow
+				click ScrollBarLeftArrow
+				click ScrollBarLeftArrow
+				MoveTo [0,0]
+				
+				if imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarLeft") and (not imageFoundTextEnhanced(startDateHeader, [TopLeft, BottomRight]) and (not imageFoundTextEnhanced(endDateHeader, [TopLeft, BottomRight])))
+					logWarning "Attempting to find startDate and endDate using columnSearchRectangleForced using validCharacters" 
+					return "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangleForced(startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2)
+					exit Repeat
+				end if
+			end repeat
+			
+			exit Repeat
+		end if
+		
+	end repeat
+	
+	set HeaderTextRectangle to [(imageFoundTextEnhanced(startDateHeader, [TopLeft, BottomRight], true)).topLeft + [topOffSet1,topOffSet2], (imageFoundTextEnhanced(endDateHeader,[TopLeft, BottomRight], true)).bottomRight + [bottomOffSet1,bottomOffSet2]]
+
+	log HeaderTextRectangle
+	return HeaderTextRectangle
+end columnSearchRectangle
+
+(**This handler will be used only when it's unable to find the dates or ages with ValidPattern, DPI or IgnoreSpaces, it will work with validcharacters
+@Param startDateHeader - The first Header of the column to draw out the search rectangle with
+@Param endDateHeader - The second Header of the column to draw out the search rectangle with
+@Param topOffSet1 - The first top offset for the cell to validate against
+@Param topOffSet2 - The second top offset for the cell to validate against
+@Param bottomOffSet1 - The first bottom offset for the cell to validate against
+@Param bottomOffSet2 - The second bottom offset for the cell to validate against
+@Param format - the date format
+@Return the coordinates of a search rectangle
+@Handler   
+      "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangleForced(startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2)
+**)
+function columnSearchRectangleForced startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2, format
+	if startDateHeader contains "," and endDateHeader contains ","	
+		set startDateHeader to uppercase(startDateHeader)
+		set endDateHeader to uppercase(endDateHeader)
+	else if startDateHeader does not contain "," and endDateHeader does not contain ","
+		set startDateHeader to lowercase(startDateHeader)
+		set endDateHeader to lowercase(endDateHeader)
+	end if
+	set (TopLeft, BottomRight) to "Immunizations/Forecaster-Forecast/Helpers".setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+	
+	set startDateHeaderPattern to "Immunizations/Util/Date".setPattern(startDateHeader)
+	set endDateHeaderPattern to "Immunizations/Util/Date".setPattern(endDateHeader)
+	
+	set ScrollBarLeftArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow")
+	set ScrollBarRightArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarRightArrow")
+	
+	//Adjust the logic for Headers because of grey text on grey Background
+	repeat until imageFound(text: startDateHeader,validPattern:startDateHeaderPattern,ignoreSpaces:true,validWords:"*","validCharacters":"*", enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]) and imageFound(text: endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true, validWords:"*","validCharacters":"*", enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight])
+		click ScrollBarRightArrow
+		click ScrollBarRightArrow
+		click ScrollBarRightArrow
+		MoveTo (0,0)
+		if( imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarRight")) and (not imageFound(text: startDateHeader,validPattern:startDateHeaderPattern,ignoreSpaces:true, validCharacters:"*",validWords:"*", enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]) or not imageFound(text: endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true, validWords:"*","validCharacters":"*",enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]))
+			
+			repeat until imageFound(text: startDateHeader,validWords:"*","validCharacters":"*",ignoreSpaces:true,  enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]) and imageFound(text: endDateHeader,validWords:"*","validCharacters":"*",ignoreSpaces:true, enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]) 
+				click ScrollBarLeftArrow
+				click ScrollBarLeftArrow
+				click ScrollBarLeftArrow
+				MoveTo (0,0)
+				if imageFound("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarLeft") and (not imageFound(text: startDateHeader,validCharacters:"*",ignoreSpaces:true, enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]) and not imageFound(text: endDateHeader,validCharacters:"*",ignoreSpaces:true, enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]))
+					logWarning "Could not find Headers Even With ValidCharacters:" && startDateHeader && endDateHeader
+					exit Repeat
+				end if
+			end repeat
+			set HeaderTextRectangle to [imageRectangle(text:startDateHeader,validPattern:startDateHeaderPattern, ignoreSpaces:true, enableAggressiveTextExtraction:"True", validWords:startDateHeader, SearchRectangle:[TopLeft, BottomRight]).topLeft + [topOffSet1,topOffSet2], imageRectangle(text:endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true,  enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]).bottomRight + [bottomOffSet1,bottomOffSet2]]
+			log HeaderTextRectangle
+			return HeaderTextRectangle
+			exit Repeat
+		end if
+	end repeat
+	set HeaderTextRectangle to [imageRectangle(text:startDateHeader,validPattern:startDateHeaderPattern, ignoreSpaces:true,validWords:"*","validCharacters":"*",enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]).topLeft + [topOffSet1,topOffSet2], imageRectangle(text:endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true,validWords:"*","validCharacters":"*", enableAggressiveTextExtraction:"True", SearchRectangle:[TopLeft, BottomRight]).bottomRight + [bottomOffSet1,bottomOffSet2]]
+	log HeaderTextRectangle
+	return HeaderTextRectangle
+end columnSearchRectangleForced
+
+(** Return the search rectangle that contains the entire column given the column Header
+@Param startDateHeader - The first Header of the column to draw out the search rectangle with
+@Param endDateHeader - The second Header of the column to draw out the search rectangle with
+@Param topOffSet1 - The first top offset for the cell to validate against
+@Param topOffSet2 - The second top offset for the cell to validate against
+@Param bottomOffSet1 - The first bottom offset for the cell to validate against
+@Param bottomOffSet2 - The second bottom offset for the cell to validate against
+@Param format - the date format
+@Return the coordinates of a search rectangle
+@Handler 
+     "Immunizations/Forecaster-Forecast/Helpers".noScrollColumnSearchRectangle(startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2)
+**)
+function noScrollColumnSearchRectangle startDateHeader, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2, format
+	if startDateHeader contains "," and endDateHeader contains ","	
+		set startDateHeader to uppercase(startDateHeader)
+		set endDateHeader to uppercase(endDateHeader)
+	else if startDateHeader does not contain "," and endDateHeader does not contain ","
+		set startDateHeader to lowercase(startDateHeader)
+		set endDateHeader to lowercase(endDateHeader)
+	end if
+	set (TopLeft, BottomRight) to "Immunizations/Forecaster-Forecast/Helpers".setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+	
+	set startDateHeaderPattern to "Immunizations/Util/Date".setSpecificPatternForDateOrAge(startDateHeader, format)
+	set endDateHeaderPattern to "Immunizations/Util/Date".setSpecificPatternForDateOrAge(endDateHeader, format)
+	
+	set ScrollBarLeftArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow")
+	set ScrollBarRightArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarRightArrow")
+	//Adjust the logic for Headers because of grey text on grey Background
+	if imageFound(text: startDateHeader,validPattern:startDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)) and imageFound(text: endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight))
+		log  "Found Headers:" && startDateHeader && endDateHeader
+		set HeaderTextRectangle to (imageRectangle(text:startDateHeader,validPattern:startDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)).topLeft + (topOffSet1,topOffSet2), imageRectangle(text:endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)).bottomRight + (bottomOffSet1,bottomOffSet2))
+		log HeaderTextRectangle
+	else if not imageFound(text: startDateHeader,validPattern:startDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)) and not imageFound(text: endDateHeader,validPattern:endDateHeaderPattern,ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight))
+		logWarning "Attempting to run handler columnSearchRectangleDeprecated"
+		if imageFound(text: startDateHeader,validCharacters:"*",ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)) and imageFound(text: endDateHeader,validCharacters:"*",ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)) 
+			logWarning "Found With ValidCharacters:" && startDateHeader && endDateHeader
+			set HeaderTextRectangle to (imageRectangle(text:startDateHeader,validCharacters:"*",ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)).topLeft + (topOffSet1,topOffSet2), imageRectangle(text:endDateHeader,validCharacters:"*",ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight)).bottomRight + (bottomOffSet1,bottomOffSet2))
+			log HeaderTextRectangle
+		else 
+			logWarning "Could not find Headers Even With ValidCharacters:" && startDateHeader && endDateHeader
+		end if
+	end if
+	return HeaderTextRectangle
+end noScrollColumnSearchRectangle
+
+(** Return the search rectangle of the column Header area
+@Param startDateHeader - The first Header of the column to draw out the search rectangle with
+@Param endDateHeader - The second Header of the column to draw out the search rectangle with
+@Return the coordinates of a search rectangle
+@Handler 
+    "Immunizations/Forecaster-Forecast/Helpers".setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+**)
+function setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+	if startDateHeader contains "," and endDateHeader contains ","
+		set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Header")+[275,15]
+		set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header")+(5,-5)
+	else if startDateHeader does not contain "," and endDateHeader does not contain ","
+		set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Header")+(275,0)
+		set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header")+(5,-15)
+		log ReadText(TopLeft, bottomRight)
+	else 
+		//This section is for when the start and end values are a combination of date and age, if there are issues finding one of the values, you can adjust the test to look for both dates or both ages to run with a smaller search rectangle.
+		set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Header")+(275,0)
+		set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header")+(5,-5)
+	end if
+	return (TopLeft, BottomRight)
+end setRectangleForColumnSearchRectangle
+
+(** Return the search rectangle that contains the entire row given some Text undearneath the given Header
+@Param Text - The Text inside the column
+@Return the coordinates of a search rectangle
+@Handler
+   set rowSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangle(text)
+**)
+function rowSearchRectangle text
+	if text is in ("Diphtheria, Tetanus, and Pertussis","Haemophilus Influenzae Type B", "Pneumococcal Polysaccharide", "Pneumococcal Conjugate") 
+		set textRectangle to imageRectangle(text:text, SearchRectangle:"Immunizations/Forecaster-Common/Helpers".largeFirstColumnSearchRectangle())
+	else if text is in ("Varicella", "Zoster")
+		set textRectangle to imageRectangle(text:text, SearchRectangle:"Immunizations/Forecaster-Common/Helpers".smallFirstColumnSearchRectangle())
+	else
+		set textRectangle to imageRectangle(text:text, SearchRectangle:"Immunizations/Forecaster-Common/Helpers".firstcolumnSearchRectangle())
+	end if
+	set topLeft to (textRectangle.TopLeft + (-3, -3))
+	set bottomRight to (imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header").x, textRectangle.BottomRight.y + 25)
+	return(topLeft, bottomRight)
+end rowSearchRectangle
+
+(** Return the search rectangle that contains the entire row given image undearneath 
+@Param Header - The Header of the column 
+@Param Image - The Image of the ose through vaccine inside the column
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangleImage(image)
+**)
+function rowSearchRectangleImage image
+	if image is not in ("Immunizations/Forecaster-Common/HibStrikethrough","Immunizations/Forecaster-Common/DtapStrikethrough") 
+		set TextRectangle to imageRectangle(image:image, SearchRectangle:"Immunizations/Forecaster-Common/Helpers".firstcolumnSearchRectangle())
+	else
+		set textRectangle to imageRectangle(image:image,SearchRectangle:"Immunizations/Forecaster-Common/Helpers".largeFirstColumnSearchRectangle())
+	end if 
+	set TopLeft to (TextRectangle.TopLeft + (-3, -3))
+	set BottomRight to (imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header").x + 100, TextRectangle.BottomRight.y + 25)
+	return(TopLeft, BottomRight)
+end rowSearchRectangleImage
+
+(** Return the offsets for ColumnSearchRectangle handler.
+@Param alignment - The column header alignment for the first and second value (should be a list)
+@Handler
+    "Immunizations/Forecaster-Forecast/Helpers".columnHeaderAlignment(alignment)
+**)
+function columnHeaderAlignment alignment
+	if alignment is ("Left","Right")
+		set topOffSet1 to -15
+		set topOffSet2 to -15
+		set bottomOffSet1 to 5 
+		set bottomOffSet2 to 600
+	else if alignment is ("Center","Right")
+		set topOffSet1 to -85 
+		set topOffSet2 to -85
+		set bottomOffSet1 to 5 
+		set bottomOffSet2 to 600
+	else if alignment is ("Center","Center")
+		set topOffSet1 to -85 
+		set topOffSet2 to -85
+		set bottomOffSet1 to 85 
+		set bottomOffSet2 to 600
+	else if alignment is ("Left","Center")
+		set topOffSet1 to -15 
+		set topOffSet2 to -15
+		set bottomOffSet1 to 85 
+		set bottomOffSet2 to 600	
+	end if
+	log topOffSet1 && topOffSet2 && bottomOffSet1 && bottomOffSet2
+	return (topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2)
+end columnHeaderAlignment
+
+(** Return the search rectangle that contains the Today's column
+@Return the coordinates of a search rectangle
+@Handler 
+     "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangleToday()
+**)
+function columnSearchRectangleToday
+	set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Today")
+	set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Today")
+	return(TopLeft, BottomRight+(0,600))
+end columnSearchRectangleToday
+
+(** Return the search rectangle that contains the entire column given the column Header with index (for scenarios where multiple occurences of the same start and end values exist)
+@Param Header - The Header of the column 
+@Return the coordinates of a search rectangle
+@Handler 
+     "Immunizations/Forecaster-Forecast/Helpers".olumnSearchRectangleWithIndex index1, startDateHeader, index2, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2, format
+**)
+function columnSearchRectangleWithIndex index1, startDateHeader, index2, endDateHeader, topOffSet1, topOffSet2, bottomOffSet1, bottomOffSet2, format
+	set TopLeft to imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Header")
+	set BottomRight to imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header")
+	set ScrollBarRightArrow to imageLocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarRightArrow")
+	
+	if startDateHeader contains "," and endDateHeader contains ","	
+		set startDateHeader to uppercase(startDateHeader)
+		set endDateHeader to uppercase(endDateHeader)
+	else if startDateHeader does not contain "," and endDateHeader does not contain ","
+		set startDateHeader to lowercase(startDateHeader)
+		set endDateHeader to lowercase(endDateHeader)
+	end if
+	set startDateHeaderPattern to "Immunizations/Util/Date".setPattern(startDateHeader)
+	set endDateHeaderPattern to "Immunizations/Util/Date".setPattern(endDateHeader)
+	
+	// set headerTextRectangle1 to item index1 of everyimagelocation(text:startDateHeader,ignorespaces:true,validCharacters:"*",searchRectangle:(TopLeft,BottomRight)) + (topOffSet1,topOffSet2)
+	set headerTextRectangle1 to item index1 of everyimagelocation(text:startDateHeader,ignorespaces:true,validPattern:startDateHeaderPattern, searchRectangle:(TopLeft,BottomRight)) + (topOffSet1,topOffSet2)
+	// set headerTextRectangle2 to item index2 of everyimagelocation(text:endDateHeader,ignorespaces:true,validCharacters:"*",searchRectangle:(TopLeft,BottomRight)) +(bottomOffset1,bottomOffSet2)
+	set headerTextRectangle2 to item index2 of everyimagelocation(text:endDateHeader,ignorespaces:true,validPattern:endDateHeaderPattern, searchRectangle:(TopLeft,BottomRight)) +(bottomOffset1,bottomOffSet2)
+	put (headerTextRectangle1,headerTextRectangle2) into HeaderTextRectangle
+	log HeaderTextRectangle
+	logwarning "Column headers were found using validCharacters"
+	return HeaderTextRectangle
+end columnSearchRectangleWithIndex
+
+(** Return the search rectangle that contains the CDC schedule link rectangle
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".cdcScheduleLinkSearchRectangle()
+**)
+function cdcScheduleLinkSearchRectangle 
+	return (ImageRectangle("Immunizations/Forecaster-Forecast/Common/Icon_CDC").topleft-(250,100) ,ImageRectangle("Immunizations/Forecaster-Forecast/Common/Icon_CDC").topRight+(350,0))
+end cdcScheduleLinkSearchRectangle 
+
+(** Return the search rectangle that contains the RegistryImport and ConsentToShare links are displayed at the bottom on the left-hand side
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".registryAndConsentLinksSearchRectangle
+**)
+function registryAndConsentLinksSearchRectangle 
+	set  TL_ScrollBarLeft to imagelocation("Immunizations/Forecaster-Forecast/Search/Icon_ScrolledToFarLeft")+(-310,-10)  
+	return(TL_ScrollBarLeft,TL_ScrollBarLeft+(680,85))
+end registryAndConsentLinksSearchRectangle 
+
+(** Return the search rectangle that for result details window
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".resultDetailsSearchRectangle()
+**)
+function resultDetailsSearchRectangle
+	return (ImageRectangle("Immunizations/Forecaster-Forecast/Label_ResultDetails").topLeft-(30,0),ImageRectangle("Immunizations/Forecaster-Forecast/Label_ResultDetails").TopRight+(650,500))
+end resultDetailsSearchRectangle

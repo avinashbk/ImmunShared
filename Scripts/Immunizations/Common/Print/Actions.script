@@ -1,0 +1,42 @@
+﻿(**Interaction script for the Print functionality**)
+
+(**Opens PrintRecord from all the 3 views(MPage, Forecaster and List view)
+@Param text to click on the print record
+@Handler run "Immunizations/Common/Print/Actions".clickPrintRecord(text)**)
+On clickPrintRecord text
+	Set topPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	Click Text:text, EnableAggressiveTextExtraction:"True", ignoreSpaces:true, searchRectangle:topPaneRectangle
+	
+	if imageFound(image:"Immunizations/Common/Print/Button_Print", waitFor:5)
+		click FoundImageLocation()
+	else if imageFound(image:"Immunizations/Common/Print/HighlightedButton_Print", waitFor:5) 
+		Click FoundimageLocation()
+	end if
+	wait 2
+	
+	if imageFound(image:"Immunizations/Common/Print/Button_Maximize", waitFor:5) 
+		Click FoundimageLocation()
+	end if 
+End clickPrintRecord
+
+(**Closes the Print Record dialog
+@Handler run "Immunizations/Common/Print/Actions".closePrintRecord**)
+On closePrintRecord 
+	Click image:"Immunizations/Common/Print/Button_Close"
+	if imageFound(image:"Immunizations/Common/Print/Button_Close") 
+		Click FoundimageLocation()
+	end if
+	Wait 5
+End closePrintRecord
+
+(**Saves the print report
+@Handler run "Immunizations/Common/Print/Actions".savePrintRecord printDocumentName**)
+On savePrintRecord printDocumentName
+	click image: "Immunizations/Common/Print/Button_Save"
+	typeText printDocumentName & ".pdf"
+	typeText returnKey
+	if imageFound("Immunizations/Common/Print/Popup_Save_As")
+		typeText "y"
+		typeText returnKey
+	end if
+End savePrintRecord

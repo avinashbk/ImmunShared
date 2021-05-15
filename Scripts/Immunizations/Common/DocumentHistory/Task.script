@@ -1,0 +1,60 @@
+﻿(**TaskScript for the DocumentHistory functionality**)
+
+(**
+@Param vaccineName the vaccine group to be selected
+@Param DateFormat the date format to be selected
+@Param AdminDate the administration date to be entered
+@Param Source the source to be selected
+@param text that will see whether to select froecast button or list button
+@param viewPoint that will select MPages view name that might change
+@Handler run "Immunizations/Common/DocumentHistory/Task".documentRequiredInput vaccineName, dateFormat, AdminDate, source,button**) 
+On documentRequiredInput vaccineName, dateFormat, AdminDate, source, button
+	run "Immunizations/Common/DocumentHistory/Actions".openDialog
+	run "Immunizations/Common/SelectImmunizationsList".selectvaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".clickSelectButton 
+	run "Immunizations/Common/DocumentHistory/Actions".requiredInput vaccineName, dateFormat, adminDate, source
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton button
+End documentRequiredInput
+
+(**TaskScript for the DocumentHistory functionality**)
+
+(**
+@Param vaccineName the vaccine group to be selected
+@Param DateFormat the date format to be selected
+@Param AdminDate the administration date to be entered
+@Param Source the source to be selected
+@Param Product the product to be selected
+@Handler run "Immunizations/Common/DocumentHistory/Task".documentWithProduct vaccineName, dateFormat, adminDate, source, product, button**) 
+On documentWithProduct vaccineName, dateFormat, adminDate, source, product, button
+	run "Immunizations/Common/DocumentHistory/Actions".openDialog
+	run "Immunizations/Common/SelectImmunizationsList".selectvaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".clickSelectButton
+	run "Immunizations/Common/DocumentHistory/Actions".requiredInput vaccineName, dateFormat, adminDate, source
+	run "Immunizations/Common/DocumentHistory/Actions".productInput product
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton button
+End documentWithProduct
+
+(**
+@Param vaccineName the vaccine group to be selected
+@Param DateFormat the date format to be selected
+@Param AdminDate the administration date to be entered
+@Param Source the source to be selected
+@Param Product the product to be selected
+@Handler run "Immunizations/Common/DocumentHistory/Task".documentWithProductRepeat vaccineName, dateFormat, adminDate, source, product, button**) 
+On documentWithProductRepeat vaccineName, dateFormat, adminDateList, source, product, button
+	run "Immunizations/Common/DocumentHistory/Actions".openDialog
+	run "Immunizations/Common/SelectImmunizationsList".selectvaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".clickSelectButton
+	repeat for each item in adminDateList
+		run "Immunizations/Common/DocumentHistory/Actions".requiredInput vaccineName, dateFormat, item counter() of adminDateList, source
+		run "Immunizations/Common/DocumentHistory/Actions".productInput product
+		click image: "Immunizations/Common/DocumentHistory/Document_Another_Administration"
+		click imageLocation("Immunizations/Common/DocumentHistory/Document_Another_Administration") + (0, 100)
+		scrollWheelDown 12
+	end repeat 
+	click image: "Immunizations/Common/DocumentHistory/Delete_Entry"
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton button
+	wait 5
+	
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"	
+End documentWithProductRepeat

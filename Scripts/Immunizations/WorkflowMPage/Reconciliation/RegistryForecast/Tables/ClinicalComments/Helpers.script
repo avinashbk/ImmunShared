@@ -1,0 +1,8 @@
+﻿(** Return the search rectangle enclosing the Registry Forecast's Clinical Comments Section content.
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".clinicalCommentsContentSearchRectangle()
+**)
+function clinicalCommentsContentSearchRectangle
+	return (imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Label_ClinicalComments")+(-35,10), imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Button_Back")+(1760,-20))
+end clinicalCommentsContentSearchRectangle

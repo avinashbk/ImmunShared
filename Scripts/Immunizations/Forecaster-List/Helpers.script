@@ -1,0 +1,38 @@
+﻿(** Return the search rectangle that contains the entire column given the column Header
+@Param index - The column you are wanting to validate for.
+@Return the coordinates of a search rectangle
+@Handler 
+     "Immunizations/Forecaster-List/Helpers".columnSearchRectangle(index)
+**)
+function columnSearchRectangle index
+	set rectangle to (imageLocation("Immunizations/Forecaster-Forecast/Search/TL_Header"),imageLocation("Immunizations/Forecaster-Forecast/Search/BR_Header")+(20,0))
+	set list to everyImageLocation(text:"Action", validWords:"Action", DPI:100, searchRectangle:rectangle)
+	set topLeft to item index of list+(-20,0)
+	set bottomRight to item index + 1 of list
+	if bottomRight is empty
+		set bottomRight to imageLocation(image:"Immunizations/Forecast-List/LastColumnHeaderSeparator")
+	else
+		add (-20,0) to bottomRight
+	end if
+	return (topLeft, bottomRight)
+end columnSearchRectangle
+
+(** Return the search rectangle that contains the RegistryImport and ConsentToShare links are displayed at the bottom on the left-hand side
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".registryAndConsentLinksSearchRectangle
+**)
+function registryAndConsentLinksSearchRectangle 
+	set  TL_ScrollBarLeft to imagelocation("Immunizations/Common/TL_TopPane")+[0,550]  
+	return[TL_ScrollBarLeft,TL_ScrollBarLeft+[680,220]]
+end registryAndConsentLinksSearchRectangle 
+
+(** Return the search rectangle for the many items documented popover
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Forecaster-Forecast/Helpers".itemsDocumentedPopoverSearchRectangle()
+**)
+function itemsDocumentedPopoverSearchRectangle
+	set  TL_Chevron to imagelocation("Immunizations/Forecast-List/Icon_Chevron")+(-200,20)  
+	return(TL_Chevron,TL_Chevron+(350,210))
+end itemsDocumentedPopoverSearchRectangle

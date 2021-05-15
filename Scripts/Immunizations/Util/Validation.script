@@ -1,0 +1,232 @@
+﻿(** Validate if the given Rectangle contains the given Text
+@Param Text the Text value to search for
+@Param Rectangle  the area to search for the Text in
+@Param dpiMin (OPTIONAL) the minimum range of DPI to be used by helper_findTextWithVariableDPI()
+@Param dpiMax (OPTIONAL) the maximum range of DPI to be used by helper_findTextWithVariableDPI()
+@Param dpiIncrementalStep (OPTIONAL) the step value by which the DPI needs to be incremented,  to be used by helper_findTextWithVariableDPI()
+@Handler
+	run "Immunizations/Util/Validation".verifyText Text, Rectangle, dpiMin, dpiMax, dpiIncrementalStep
+**)
+on verifyText Text, rectangle, dpiMin, dpiMax, dpiIncrementalStep
+	if imageFound(Text:Text, SearchRectangle:rectangle)
+		LogSuccess "Found:" && text
+	else if imageFound(Text:Text, ignoreSpaces:"true", SearchRectangle:rectangle)
+		LogSuccess "Found With IgnoreSpaces:" && text
+	else if imagefound(text: text,searchRectangle:rectangle, dpi:150, ignoreSpaces:"true")
+		LogSuccess "Found with DPI of 150 and IgnoreSpaces:" && text
+	else if imagefound(text: text,searchRectangle:rectangle, dpi:150, validPattern:"Immunizations/Util/Date".setPattern(text))
+		LogSuccess "Found with validPattern: " && "Immunizations/Util/Date".setPattern(text)
+	else if imageFound(text: text, SearchRectangle: rectangle, DPI:250, ignoreSpaces:"true", EnableAggressiveTextExtraction:"Yes", validPattern:"Immunizations/Util/Date".setPattern(text))
+		LogSuccess "Found with DPI of 250, EnableAggressiveTextExtraction and IgnoreSpaces:" && text
+	else if item 1 of "Immunizations/Util/Validation".helper_findTextWithVariableDPI(text, rectangle, dpiMin, dpiMax, dpiIncrementalStep)
+		LogSuccess "Found" && text && "with helper_findTextWithVariableDPI()"
+	else
+		LogError "Could Not Find:" && text && "in" && readText(rectangle) && "Attempting to run handler verifyTextDeprecated"
+		run "Immunizations/Util/Validation".verifyTextDeprecated text, rectangle
+	end if
+end verifyText
+
+(** find text by changing the DPI in a given range in a search Rectangle. This is a helper function and must not be called in the VR script.
+@Param text: the Text value to search for
+@Param rectangle: the area to search for the Text in
+@Param dpiMin (OPTIONAL) the minimum range of DPI
+@Param dpiMax (OPTIONAL) the maximum range of DPI
+@Param dpiIncrementalStep (OPTIONAL) the step value by which the DPI needs to be incremented
+@Param pattern (OPTIONAL) the regex pattern of the text, to be used with verifyTextWithPattern
+@Handler
+	run "Immunizations/Util/Validation".helper_findTextWithVariableDPI(text, rectangle, dpiMin, dpiMax, dpiIncrementalStep, pattern) 
+**)
+function helper_findTextWithVariableDPI text, rectangle, dpiMin, dpiMax, dpiIncrementalStep, pattern
+	LogWarning "Using helper_findTextWithVariableDPI() while running verifyText/verifyTextWithPattern"
+	
+	if dpiMin is empty then set dpiMin to 90
+	if dpiMax is empty then set dpiMax to 250
+	if dpiIncrementalStep is empty then set dpiIncrementalStep to 10
+	if pattern is empty then set pattern to ""
+	
+	repeat with currDPI=dpiMin to dpiMax step dpiIncrementalStep
+		if imageFound(text:text, searchRectangle:rectangle, dpi:currDPI, ignoreSpaces:true, validPattern:pattern, EnableAggressiveTextExtraction:"Yes")
+			LogSuccess "Found '" && text && "' at variable DPI value of" && currDPI 
+			return [true, currDPI]
+		end if
+	end repeat
+	
+	return [false, 72]
+end helper_findTextWithVariableDPI
+
+(** THIS HANDLER SHOULD NOT BE USED ALONE FOR VALIDATIONS, instead handler verifyText should be utilized.
+@Param Text the Text value to search for
+@Param Rectangle  the area to search for the Text in
+@Handler
+	run "Immunizations/Util/Validation".verifyTextDeprecated Text, Rectangle
+**)
+on verifyTextDeprecated text, rectangle
+	if imageFound(Text:text,ValidWords:text,ignoreSpaces:true,ValidCharacters:text,SearchRectangle: rectangle)
+		LogSuccess "Found With Valid Characters:" && text && "in" && readText(rectangle)
+	else
+		LogError "Could Not find With Valid Characters:" && text && "in" && readText(rectangle)
+	end if
+end verifyTextDeprecated
+
+(** Validate if the given Rectangle does not contain the given Text
+@Param Text the Text value to search for
+@Param Rectangle  the area to search for the Text in
+@Handler
+    run "Immunizations/Util/Validation".VerifyTextNotVisible Text, Rectangle
+**)
+on verifyTextNotVisible Text, Rectangle
+	if not imageFound(Text:Text, SearchRectangle: Rectangle)
+		LogSuccess "Could Not find:" && Text 
+	else
+		LogError "Found:" && Text && "in" && readText(Rectangle)
+	end if
+end verifyTextNotVisible
+
+(** Validate if the given Rectangle contains the given image
+@Param image the name of the image to search for
+@Param Rectangle  the area to search for the image in
+@Handler
+	run "Immunizations/Util/Validation".Verifyimage image, Rectangle
+**)
+on verifyImage image, Rectangle
+	if imageFound(image:image, SearchRectangle: Rectangle)
+		LogSuccess "Found the image:" && image
+	else
+		LogError "Could Not find:" && image &&  "in" && readText(rectangle) 
+	end if
+end verifyImage
+
+(** Validate if the given Rectangle does not contain the given image
+@Param image the name of the image to search for
+@Param Rectangle  the area to search for the image in
+@Handler
+	run "Immunizations/Util/Validation".VerifyimageNotVisible image, Rectangle
+**)
+on verifyImageNotVisible image, Rectangle
+	if not imageFound(image:image, SearchRectangle: Rectangle)
+		LogSuccess "Could Not find:" && image
+	else
+		LogError "Found the image:" && image &&  "in" && readText(rectangle) 
+	end if
+end verifyImageNotVisible
+
+(** Provide a message for known test discrepancies
+@Param jira the JIRA number for the known test discrepancy (e.g. HMDEV-1111)
+@Handler
+	run "Immunizations/Util/Validation".validationJiraComment jira
+**)
+on validationJiraComment jira
+	LogWarning "Test discrepancy may be observed due to" && jira
+end validationJiraComment
+
+(** Validate if the given Rectangle contains the given Date
+@Param Text- value to search for
+@Param Rectangle- the area to search for the Text in
+@Param Pattern- the Fomatting of the date or age
+@Param dpiMin (OPTIONAL) the minimum range of DPI to be used by helper_findTextWithVariableDPI()
+@Param dpiMax (OPTIONAL) the maximum range of DPI to be used by helper_findTextWithVariableDPI()
+@Param dpiIncrementalStep (OPTIONAL) the step value by which the DPI needs to be incremented,  to be used by helper_findTextWithVariableDPI()
+@Handler
+	run "Immunizations/Util/Validation".verifyTextWithPattern text, Pattern, Rectangle, dpiMin, dpiMax, dpiIncrementalStep
+**)
+on verifyTextWithPattern text, Pattern, rectangle, dpiMin, dpiMax, dpiIncrementalStep
+	if imagefound(text: text,validPattern:Pattern,searchRectangle:rectangle)
+		logSuccess "Found with validPattern:" && text
+	else if imagefound(text: text,validPattern:Pattern,searchRectangle:rectangle, ignorespaces: true)
+		logSuccess "Found with ignoreSpaces:" && text && "with validPattern"
+	else if imagefound(text: text,searchRectangle:rectangle, dpi:150,validPattern:Pattern, ignorespaces: true)
+		logSuccess "Found with DPI of 150:" && text
+	else if imagefound(text: text,searchRectangle:rectangle, enableAggressiveTextExtraction:"True",validPattern:Pattern, ignorespaces: true)
+		logSuccess "Found with enableAggressiveTextExtraction:" && text
+	else if imagefound(text: text,searchRectangle:rectangle, DPI:250,enableAggressiveTextExtraction:"True",validPattern:Pattern, ignorespaces: true)
+		logSuccess "Found with DPI:250 and enableAggressiveTextExtraction:" && text
+	else if item 1 of "Immunizations/Util/Validation".helper_findTextWithVariableDPI(text, rectangle, dpiMin, dpiMax, dpiIncrementalStep, pattern)
+		LogSuccess "Found" && text && "with helper_findTextWithVariableDPI()"
+	else 
+		LogError "Could Not Find:" && text && "in" && readText(rectangle) && "Attempting to run handler verifyDateDeprecated"
+		run "Immunizations/Util/Validation".verifyTextDeprecated Text, Rectangle
+	end if 
+end verifyTextWithPattern
+
+(** Validate if dates with validPattern set (helpful when characters are read incorrectly by OCR)
+@Param date - the date value to search for
+@Param format - the date format
+@Param rectangle - the area to search for the date in
+@Handler
+	run "Immunizations/Util/Validation".verifyDateWithPattern date, format, rectangle
+**)
+on verifyDateWithPattern date, format, rectangle
+	if format is "%b %d, %Y"
+		set pattern to "[A-Z][A-Z][A-Z] [0-9][0-9], [0-9][0-9][0-9][0-9]"
+		run "Immunizations/Util/Validation".verifyTextWithPattern date, pattern, rectangle
+	else if format is "%d/%b/%Y"
+		set pattern to "[0-9],[0-9]/[0-9],[0-9]/[0-9],[0-9],[0-9],[0-9]"
+		run "Immunizations/Util/Validation".verifyTextWithPattern date, pattern, rectangle
+	end if
+end verifyDateWithPattern
+
+(** Validate if the given text is empty
+@Param Text the Text value to validate 
+@Handler
+	run "Immunizations/Util/Validation".verifyEmptyText Text
+**)
+on verifyEmptyText Text
+	If Text Equals Empty
+		LogSuccess "The field is empty"
+	Else
+		LogError "The field is not empty"
+	End if
+end verifyEmptyText
+
+(** Validate if the given value matches the output value by removing the spaces
+@Param output the readtext value to compare the input value 
+@Param value the Text value to validate 
+@Handler
+	run "Immunizations/Util/Validation".verifyValue  output, value
+**)
+on verifyValue output, value
+	If Output Contains Value
+		LogSuccess "Correct Value displays"
+	Else
+		Replace every occurrence of " " with "" in Output // To remove spaces
+		If Output Contains Value
+			LogSuccess "Correct Value displays"
+		Else
+			LogError "Incorrect value displays"
+		End if
+	End if
+end verifyValue
+
+(** Validate if the given value equals the output value by removing the spaces
+@Param output the readtext value to compare the input value 
+@Param value the Text value to validate 
+@Handler
+	run "Immunizations/Util/Validation".verifyValueEquals  output, value
+**)
+on verifyValueEquals output, value
+	If Output Equals Value
+		LogSuccess "Correct Value displays"
+	Else
+		Replace every occurrence of " " with "" in Output // To remove spaces
+		If Output Equals Value
+			LogSuccess "Correct Value displays"
+		Else
+			LogError "Incorrect value displays"
+		End if
+	End if
+end verifyValueEquals
+
+(** Validate if the given value is true or false
+@Param value is the value to validate 
+@Handler
+	run "Immunizations/Util/Validation".verifyTrueValue value
+**)
+on verifyTrueValue value
+	If value = true
+		LogSuccess "Correct value displays"
+	Else if value = false
+		LogError "Incorrect value displays"
+	Else
+		LogError "Value was returned as neither true or false"
+	End if
+end verifyTrueValue

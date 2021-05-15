@@ -1,0 +1,97 @@
+﻿(**Clicks on the wizard in the bedrock dashboard
+@Param wizardName The wizard name which is to be clicked
+@Handler Clicks on the required wizard in the bedrock dashboard
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".clickWizard wizardName**)
+On clickWizard wizardName
+	put ImageRectangle(imagename:"Immunizations/Common/Bedrock/Icon_DesignBuildandMaintenance").topLeft+(5,-5) into TL_FirstWizard
+	Insert TL_FirstWizard+(1800,45) into BR_LastWizard
+	Click text:wizardName,searchRectangle:(TL_FirstWizard,BR_LastWizard),DPI:144
+	set the SearchRectangle to empty
+End clickWizard
+
+(**Clicks on the solution in the Solutions section on the left hand side
+@Param solution The solution which is to be selected
+@Handler Clicks on the required solution in the Solutions section on the left hand side
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".selectSolution solution**)
+On selectSolution solution
+	put ImageRectangle(imagename:"Immunizations/Common/Bedrock/Icon_DesignBuildandMaintenance").bottomLeft into TL_FirstWizard
+	Insert TL_FirstWizard+(550,900) into BR_Solutions
+	Click text:solution,searchRectangle:(TL_FirstWizard,BR_Solutions)
+	set the SearchRectangle to empty
+End selectSolution
+
+(**Clicks on the mpage under the Wizards section on the right hand side
+@Param MPage The MPage which is to be clicked (like View Builder, MPage Setup, ViewPoint Setup and Quality Measures MPage Parameters)
+@Handler Clicks on the mpage under the Wizards section on the right hand side
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".clickMPage MPage**)
+On clickMPage MPage
+	put ImageRectangle(imagename:"Immunizations/Common/Bedrock/Icon_Wizards").bottomLeft into TL_Wizards
+	Insert TL_Wizards+(1000,850) into BR_Wizards
+	Click text:MPage,searchRectangle:(TL_Wizards,BR_Wizards)
+	set the SearchRectangle to empty
+End clickMPage
+
+(**Typetexts the mpage setup within the 'Select a topic' dropdown and clicks Next
+@Param MPageSetup The MPageSetup which is to be opened
+@Handler Typetexts the mpage setup within the 'Select a topic' dropdown and clicks Next
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".selectMPageSetup MPageSetup**)
+On selectMPageSetup MPageSetup
+	set rectangle to  "Immunizations/Util/Bedrock/MPageSetup/Helpers".mpageSetupSearchRectangle
+	if  ImageFound(image:"Immunizations/Common/Bedrock/MPageSetupWindow/Topicname",waitfor:10) then
+		moveto FoundImageLocation()+(30,0)
+		typetext MPageSetup
+		wait 1
+		typetext returnkey
+		wait 1
+		click imagename:"Immunizations/Common/Bedrock/MPageSetupWindow/Button_Next"
+	else
+		put imagelocation(imagename:"Immunizations/Common/Bedrock/MPageSetupWindow/ViewSavedSettings")+(-140,0) into dropDownField
+		click dropDownField
+		wait 1
+		typetext MPageSetup
+		wait 1
+		typetext returnkey
+		wait 1
+		click imagename:"Immunizations/Common/Bedrock/MPageSetupWindow/Button_Next"
+	end if
+	set the SearchRectangle to empty
+End selectMPageSetup
+
+(**Selects the yes/no radio buttons for immunization forecasting display in Design MPage Filters view in the MPage Setup
+@Param image The yes/no radio button image which is to be selected 
+@Handler Sets the forecasting display to yes/no  
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".setImmunizationsForecastingDisplay image**)
+On setImmunizationForecastingDisplay image
+	set rectangle to  "Immunizations/Util/Bedrock/MPageSetup/Helpers".defineMPAGEFiltersSearchRectangle
+	put imageLocation(imagename:"Immunizations/Common/Bedrock/MPageSetupWindow/Label_ImmunizationForcastingDisplay")+(-100,-10) into TL_Display
+	Insert TL_Display+(660,515) into BR_Display
+	Click imagename:image,searchRectangle:(TL_Display,BR_Display)
+	click imagename:"Immunizations/Common/Bedrock/MPageSetupWindow/Button_Save",searchRectangle:(TL_Display,BR_Display)
+	set the SearchRectangle to empty
+End setImmunizationForecastingDisplay
+
+(**Clicks on the button in the MPage Setup window on all views
+@Param button The image which is to be clicked 
+@Handler Clicks on the button in the MPage Setup window on all views
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".clickbuttonwithinMPageSetup button**)
+On clickButtonInMPageSetup button
+	set rectangle to  "Immunizations/Util/Bedrock/MPageSetup/Helpers".mpageSetupSearchRectangle
+	click imagename:button,searchRectangle:rectangle
+	set the SearchRectangle to empty
+End clickButtonInMPageSetup
+
+(**After loading the mpage setup, Clicks on the Immunizations and Immunization Forecasting Display section onto the left-hand side 
+@Handler Clicks on the Immunizations and Immunization Forecasting Display section onto the left-hand side 
+run "Immunizations/Util/Bedrock/MPageSetup/Actions".clickImmunizationForecastingDisplay**)
+On clickImmunizationForecastingDisplay 
+	set rectangle to "Immunizations/Util/Bedrock/MPageSetup/Helpers".mpageSetupSearchRectangle
+	doubleClick text:"Immunizations",searchRectangle:rectangle
+	if imagefound(text:"Immunization Forecasting Display",searchRectangle:rectangle) then
+		click FoundImageLocation()
+	else if imagefound(text:"Immunization Forcasting Display",searchRectangle:rectangle) then
+		click FoundImageLocation()
+	else
+		LogError "Immunization Forecasting Display: Text not found"
+	end if
+	set the searchRectangle to empty
+End clickImmunizationForecastingDisplay 

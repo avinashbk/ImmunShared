@@ -1,0 +1,74 @@
+﻿(** Checks to ensure the vaccineName group displays in the vaccineName column in Immunization History or Immunization Forecaster Table
+@Param tableName - the name of the table in which the vaccine Group should be looked in. (For e.g., "Immunization History" OR "Immunization Forecast")
+@Param vaccineName - the vaccineName group that should display in the vaccineName column
+@Handler
+     run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Validations".verifyVaccineNameColumn tableName, vaccineName
+**)
+On verifyVaccineNameColumn tableName, vaccineName
+	if tableName is in (empty, "")
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecast'"
+	else
+		if ("Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".vaccineRowSearchRectangle(tableName, vaccineName, TRUE) is FALSE)
+			LogError "'" & vaccineName & "' NOT found in 'Vaccine' column in '" & tableName & "' Table."
+		else
+			LogSuccess "'" & vaccineName & "' found in 'Vaccine' column in '" & tableName & "' Table."
+		end if
+	end if
+End verifyVaccineNameColumn
+
+(** Checks to ensure a value displays in a given cell in a particular column of a vaccineGroup row in Immunization History or Immunization Forecaster Table
+@Param tableName - the name of the table in which the vaccine Group should be looked in. (For e.g., "Immunization History" OR "Immunization Forecast")
+@Param vaccineName - the vaccineName group that should display in the vaccineName row
+@Param columnHeader - the header of the column in which the desired text needs to be validated
+@Param text - the text to be validatated in the cell
+@Param validateInTable (OPTIONAL) - if true, validate if vaccine name exists in a given table by checking the table content Header through scrolling. If false/empty this will be skipped
+@Handler
+     run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Validations".verifyColumnValue tableName, vaccineName, columnHeader, text, validateInTable
+**)
+on verifyColumnValue tableName, vaccineName, columnHeader, text, validateInTable
+	if tableName is in (empty, "")
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecast'"
+	else		
+		set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".vaccineRowSearchRectangle(tableName, vaccineName, validateInTable)
+		set columnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, columnHeader)
+		
+		if text is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+			run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash", "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".cellIntersection(rowSearchRectangle, columnSearchRectangle)
+		else
+			run "Immunizations/Util/Validation".verifyText text, "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".cellIntersection(rowSearchRectangle, columnSearchRectangle)
+		end if
+	end if
+end verifyColumnValue
+
+(** Validate the observation data "Label": "Value" pair for a particular vaccine
+@Param vaccineCellRectangle - the cell intersection rectangle of the vaccine row and column
+@Param observationLabel - the label that will be present in the observation data section
+@Parma observationValue - the value that will be present for a label in the observation data section
+@Handler
+    run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Validations".verifyObservationData vaccineCellRectangle, observationLabel, observationValue 
+**)
+on verifyObservationData vaccineCellRectangle, observationLabel, observationValue
+	set correctObservationLabelValuePairFoundFlag to false
+	
+	if (imageFound(text: observationLabel, searchRectangle: vaccineCellRectangle))
+		set observationDataRectangle to imageRectangle(text: observationLabel, searchRectangle: vaccineCellRectangle)
+		set extendedObservationDataRectangle to (observationDataRectangle.topLeft + (-3,-3), (vaccineCellRectangle.right, observationDataRectangle.bottom) + (3,3))
+		
+		if (imageFound(text: observationValue, searchRectangle: extendedObservationDataRectangle))
+			set correctObservationLabelValuePairFoundFlag to true
+		else if (imageFound(text: observationValue, searchRectangle: vaccineCellRectangle))
+			set observationDataRectangle to imageRectangle(text: observationValue, searchRectangle: vaccineCellRectangle)
+			set extendedObservationDataRectangle to ((vaccineCellRectangle.left, observationDataRectangle.top) + (-3,-3), observationDataRectangle.bottomRight + (3,3))
+			
+			if (imageFound(text: observationLabel, searchRectangle: extendedObservationDataRectangle))
+				set correctObservationLabelValuePairFoundFlag to true
+			end if
+		end if
+	end if
+	
+	if (correctObservationLabelValuePairFoundFlag is true)
+		LogSuccess "Observation Data: Value '" & observationValue & "' Found in Label '" & observationLabel & "'."
+	else
+		LogError "Observation Data: Value '" & observationValue & "' NOT Found in Label '" & observationLabel & "'."
+	end if
+end verifyObservationData

@@ -1,0 +1,162 @@
+﻿(** Verify a dose is in focus within expanded view
+@Param Text - The dose number that is currently in focus you are wanting the search rectangle drawn for
+@Handler
+   run "Immunizations/Forecaster-Forecast/Validations".verifyDoseInFocusExpandedView(text)
+**)
+on verifyDoseInFocusExpandedView text
+	set rectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewLeftPaneDoseSearchrectangle(text)
+	run "Immunizations/Util/Validation".verifyImage  "Immunizations/Forecaster-Forecast/ExpandedView/DoseInFocus",rectangle
+end verifyDoseInFocusExpandedView
+
+(** Verify a dose is displayed in red font within the Today column
+@Param vaccineName - The vaccine group the dose should be displayed in red font for.
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyDoseInRed(vaccineName)
+**)
+on verifyDoseInRed vaccineName
+	Set rowSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangle(vaccineName)
+	set columnSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers". columnSearchRectangleToday()
+	run "Immunizations/Util/Validation".verifyImage "Immunizations/Forecaster-Forecast/RedDose","Immunizations/WorkflowMPage/Table/Helpers".CellIntersection(rowSearchRectangle,columnSearchRectangle)
+end verifyDoseInRed
+
+(** Verify a dose is displayed in black font within the Today column
+@Param vaccineName - The vaccine group the dose should be displayed in red font for.
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyDoseInBlack(vaccineName)
+**)
+on verifyDoseInBlack vaccineName
+	Set rowSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangle(vaccineName)
+	set columnSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers". columnSearchRectangleToday()
+	run "Immunizations/Util/Validation".verifyImage "Immunizations/Forecaster-Forecast/BlackDose","Immunizations/WorkflowMPage/Table/Helpers".CellIntersection(rowSearchRectangle,columnSearchRectangle)
+end verifyDoseInBlack
+
+(** Verify a field value in expanded view
+@Param label - The field label
+@Param text - The field value 
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyExpandedViewField label, text
+**)
+on verifyExpandedViewField label, text
+	set expandedViewRightPaneBodySearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	set fieldrectangle to "Immunizations/Common/Helpers".fieldValueSearchRectangle(label, expandedViewRightPaneBodySearchRectangle) + (0,0,75,0)
+	run "Immunizations/Util/Validation".verifyText label && text, fieldrectangle
+end verifyExpandedViewField
+
+(** Verify a field value in expanded view with an image
+@Param label - The field label
+@Param image - The field value 
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyExpandedViewFieldImage label, image
+**)
+on verifyExpandedViewFieldImage label, image
+	set expandedViewRectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	Set rectangle to (imageLocation(Text:label, SearchRectangle:(expandedViewRectangle))+(10,-10),imageLocation(Text:label, SearchRectangle:(expandedViewRectangle))+(150,10))
+	run "Immunizations/Util/Validation".verifyImage image, rectangle 
+end verifyExpandedViewFieldImage
+
+(** Verify a comment in expanded view
+@Param text - The field value 
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyExpandedViewComment text
+**)
+on verifyExpandedViewComment text
+	set expandedViewRectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	Set rectangle to (imageLocation(Text:"Immunization Notes", SearchRectangle:(expandedViewRectangle))+(-75,10),imageLocation(Text:"Immunization Notes", SearchRectangle:(expandedViewRectangle))+(200,45))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+end verifyExpandedViewComment
+
+(** Verify the uncharted source value in expanded view
+@Param label - The field label
+@Param text - The field value 
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyExpandedViewField label, text
+**)
+on verifyExpandedViewUnchartedSource label, text
+	set expandedViewRectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	Set rectangle to (item 1 of everyImageLocation(Text:label, SearchRectangle:(expandedViewRectangle))+(20,-20),item 1 of everyImageLocation(Text:label, SearchRectangle:(expandedViewRectangle))+(180,20))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+end verifyExpandedViewUnchartedSource
+
+
+(** Verify the order of dose numbering is correct in the expanded view 
+@Handler
+    run "Immunizations/Forecaster-Forecast/Validations".verifyExpandedViewSorting 
+**)
+on verifyExpandedViewSorting 
+	set doselist to ReadText("Immunizations/Forecaster-Forecast/Helpers".expandedViewDoseSearchRectangle())
+	replace every occurrence of return in doselist with "," 
+	put doselist sorted ascending into sorteddoselist
+	if doselist=sorteddoselist
+		LogSuccess "Sorted Correctly"
+	else 
+		LogError "Sorted incorrectly:"&& doselist && "does not match" && sorteddoselist
+	end if
+end verifyexpandedviewsorting
+
+(** Verify the header's startAge and endAge along with startDate and endDates after they are found by "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangle() handler. NOTE: To be used with Dates only
+@Param startDateHeader - The first DATE Header of the column to draw out the search rectangle with
+@Param endDateHeader - The second DATE Header of the column to draw out the search rectangle with
+@Param dob - The dob of the current patient
+@Param startDateHeaderIndex - (Optional) index number when there are multiple occourances of startDateHeader dates
+@Param endDateHeaderIndex - (Optional) index number when there are multiple occourances of endDateHeader dates
+@Param displayFullFormat - (Optional) if TRUE, the age will be in long format (e.g., 12months)l else if FALSE, the age will be in short format (e.g., 12m)
+@Usage Examples: 
+	set alignment to ("Left","Right")
+	set (topOffset1, topOffset2, bottomOffSet1, bottomOffSet2) to "Immunizations/Forecaster-Forecast/Helpers".columnHeaderAlignment(alignment)
+	set columnSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".columnSearchRectangle(startDateHeader, endDateHeader, topOffset1, topOffset2, bottomOffSet1, bottomOffSet2)
+	run "Immunizations/Forecaster-Forecast/Validations".verifyColumnHeaderAges startDateHeader, endDateHeader, dob, startDateHeaderIndex, endDateHeaderIndex, displayFullFormat
+@Handler
+	run "Immunizations/Forecaster-Forecast/Validations".verifyColumnHeaderAges startDateHeader, endDateHeader, dob, startDateHeaderIndex, endDateHeaderIndex, displayFullFormat
+**)
+on verifyColumnHeaderAges startDateHeader, endDateHeader, dob, startDateHeaderIndex, endDateHeaderIndex, displayFullFormat
+	set startDateHeader to uppercase(startDateHeader)
+	set endDateHeader to uppercase(endDateHeader)
+	if startDateHeaderIndex is empty then set startDateHeaderIndex to 1
+	if endDateHeaderIndex is empty then set endDateHeaderIndex to 1
+	if useLongAge is empty then set useLongAge to false
+	
+	if startDateHeader contains "," and endDateHeader contains ","  and dob is not empty
+		set (TopLeft, BottomRight) to "Immunizations/Forecaster-Forecast/Helpers".setRectangleForColumnSearchRectangle(startDateHeader, endDateHeader)
+		
+		if imageFound(text: startDateHeader,validPattern:"Immunizations/Util/Date".setPattern(startDateHeader),ignoreSpaces:true, SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True") and imageFound(text: endDateHeader,validPattern:"Immunizations/Util/Date".setPattern(endDateHeader),ignoreSpaces:true, SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True")
+			// calculate startDate's Age and endDate's Age
+			set startDateAge to "Immunizations/Util/Date".ageCalculator (dob, startDateHeader, displayFullFormat, false)
+			set endDateAge to "Immunizations/Util/Date".ageCalculator (dob, endDateHeader, displayFullFormat, false)
+			
+			// form the rectangles to look for ages, and if not formed, log a warning or an error
+			set startDateRectangle to empty
+			set endDateRectangle to empty
+			if imageFound(text:startDateHeader,validPattern:"Immunizations/Util/Date".setSpecificPatternForDateOrAge(startDateHeader), ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True")
+				set startDateRectangle to item startDateHeaderIndex of everyImageRectangle(text:startDateHeader,validPattern:"Immunizations/Util/Date".setSpecificPatternForDateOrAge(startDateHeader), ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True") + (-2,-15, 2,2)
+			else if imageFound(text:startDateHeader,validCharacters:"*", ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True")
+				LogWarning "Finding startDateHeader" && startDateHeader && "with validCharacters"
+				set startDateRectangle to item startDateHeaderIndex of everyImageRectangle(text:startDateHeader,validCharacters:"*", ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True") + (-2,-15, 2,2)
+			else
+				LogError "startDateHeader" && startDateHeader && "Not found"
+			end if
+			
+			if imageFound(text:endDateHeader,validPattern:"Immunizations/Util/Date".setSpecificPatternForDateOrAge(endDateHeader), ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True")
+				set endDateRectangle to item endDateHeaderIndex of everyImageRectangle(text:endDateHeader,validPattern:"Immunizations/Util/Date".setSpecificPatternForDateOrAge(endDateHeader), ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True") + (-2,-15, 2,2)
+			else if imageFound(text:endDateHeader,validCharacters:"*", ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True")
+				LogWarning "Finding endDateHeader" && endDateHeader && "with validCharacters"
+				set endDateRectangle to item endDateHeaderIndex of everyImageRectangle(text:endDateHeader,validCharacters:"*", ignoreSpaces:true,SearchRectangle:(TopLeft, BottomRight), dpi:150, enableAggressiveTextExtraction:"True") + (-2,-15, 2,2)
+			else
+				LogError "endDateHeader" && endDateHeader && "Not found"
+			end if
+			
+			if startDateRectangle is not empty and endDateRectangle is not empty
+				// if startDateAge and endDateAge evaluate to be the same, it'll appear in the center of the column due to the precision used in age calculation even if the startDateHeader and endDateHeader dates are different.
+				if startDateAge is equal to endDateAge
+					Run "Immunizations/Util/Validation".verifyTextWithPattern startDateAge, "Immunizations/Util/Date".setPattern(startDateAge), (startDateRectangle.TopLeft, endDateRectangle.BottomRight)
+				else
+					Run "Immunizations/Util/Validation".verifyTextWithPattern startDateAge, "Immunizations/Util/Date".setPattern(startDateAge), startDateRectangle
+					Run "Immunizations/Util/Validation".verifyTextWithPattern endDateAge, "Immunizations/Util/Date".setPattern(endDateAge), endDateRectangle
+				end if
+			else
+				LogError "startDateRectangle and endDateRectangle could not be formed." 
+			end if
+		end if
+	else
+		LogError startDateHeader && "should be a date." && endDateHeader && "should be a date." && dob && "should not be empty."
+	end if
+end verifyColumnHeaderAges

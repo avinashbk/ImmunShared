@@ -1,0 +1,20 @@
+﻿(** Validate the VFC history in the VFC dropdown window
+@Param history - The VFC history to validate with date and user
+@Handler
+    Run "Immunizations/Common/Validation".validateVFCHistory(history)
+**)
+On validateVFCHistory history
+	Set vfcWindow to "Immunizations/Common/Helpers".vfcWindowSearchRectangle
+	Repeat Until first = last
+		Put Readtext(vfcWindow) into first
+		Moveto ImageLocation("Immunizations/Common/Button_ViewModify")+(0,100)
+		If ImageFound(2,text:history,SearchRectangle:vfcWindow)
+			Set found = True
+		Else
+			ScrollWheelDown 2
+			Set found = False
+		End If
+		Put Readtext(vfcWindow) into last
+	End Repeat
+	run "Immunizations/Util/Validation".verifyTrueValue found
+End validateVFCHistory

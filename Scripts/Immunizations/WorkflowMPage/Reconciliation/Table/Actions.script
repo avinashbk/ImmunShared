@@ -1,0 +1,48 @@
+﻿(**Selecting the admin or not given date within the applicable vaccineName group from the table
+@Param localRecordTable - Boolean. If True, the validation will be done in the local record table. If false, it will be done in the outside records table
+@param vaccineName the vaccineName group
+@Param numberOfRows - The number of rows for one vaccine group
+@Param date - the administration or not given date of the charted event
+@Handler 
+     run "Immunizations/WorkflowMPage/Reconciliation/Table/Actions".clickAdminDateColumnValue localRecordTable, vaccineName, numberOfRows, date**)
+On clickAdminDateColumnValue localRecordTable, vaccineName, numberOfRows, date
+	set columnSearchRectangle to  "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineColumnSearchRectangle(localRecordTable, vaccineName, numberOfRows)
+	click Text:date, searchRectangle:columnSearchRectangle
+End clickAdminDateColumnValue
+
+(**This handler will add or reject an immunization based on what is passed into <addOrReject>
+@Param adminDate - the administration or not given date of the charted event
+@param vaccineName the vaccineName group
+@Param numberOfRows - The number of rows for one vaccine group
+@Param addRejectUndo - if addRejectUndo is set to "add" it will add the immunization, if it is "reject" it will reject the administration, if it is "add with changes" it will open Add with Modify mode in the side panel, if it is "undo" it will click the undo button.
+@Handler 
+     run "Immunizations/WorkflowMPage/Reconciliation/Table/Actions".addRejectUndoAdministration adminDate, vaccineName, numberOfRows, addRejectUndo**)
+On addRejectUndoAdministration adminDate, vaccineName, numberOfRows, addRejectUndo
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineRowSearchRectangle(adminDate, false, vaccineName, numberOfRows)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".columnSearchRectangle(false, "Action")
+	set intersectRectangle to "Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	if "add with changes" is in addRejectUndo
+		click image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Split_Button", searchRectangle: intersectRectangle
+		set rectangle to imageRectangle(imageName:"Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Split_Button", searchRectangle:intersectRectangle) + (-15, 10, 200, 70)
+		click text: "Add With Changes", searchRectangle: rectangle
+	else if "reject" is in addRejectUndo
+		click image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button", searchRectangle: intersectRectangle
+		if imageFound("Immunizations/Setup/Caution_Icon")
+			typeText "n"
+		end if 
+		repeat until not imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button", searchRectangle: intersectRectangle)
+			wait 1
+		end repeat
+	else if "add" is in addRejectUndo
+		click image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Button", searchRectangle: intersectRectangle
+		if imageFound("Immunizations/Setup/Caution_Icon")
+			typeText "n"
+		end if 
+		repeat until not imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Button", searchRectangle: intersectRectangle)
+			wait 1
+		end repeat
+	else if "undo" is in addRejectUndo
+		click image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Undo_Button", searchRectangle: intersectRectangle
+		waitFor 30,  "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button"
+	end if 
+End addRejectUndoAdministration

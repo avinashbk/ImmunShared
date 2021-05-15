@@ -1,0 +1,283 @@
+﻿(** DEPRECATED! Return the search rectangle enclosing the desired column in the Registry Forecast's Immunization History or Immunization Forecaster Table Section content
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@param columnHeader - the name of the column
+@return - coordinates of the SearchRectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".columnSearchRectangle(tableName, columnHeader)
+**)
+function columnSearchRectangle tableName, columnHeader
+	LogWarning "DPRECATED Handler: " & return & <<"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".columnSearchRectangle(tableName, columnHeader)>>
+	
+	if tableName is in (empty, "")
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecaster'"
+	else
+		set tableRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle(tableName)
+		
+		set tableHeaderTopLeftHeaderImgLoc to imageLocation(image:"Immunizations/WorkflowMPage/Search/TL_header", SearchRectangle:tableRectangle)
+		set tableHeaderBottomRightImgLoc to imageLocation(image:"Immunizations/WorkflowMPage/Search/BR_header", SearchRectangle:tableRectangle)
+		
+		set topLeft to imageRectangle(text: columnHeader, validWords: columnHeader, SearchRectangle:(tableHeaderTopLeftHeaderImgLoc, tableHeaderBottomRightImgLoc)).topLeft +(-5,-12)
+		set bottomRight to ImageLocation(image:"Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, tableHeaderBottomRightImgLoc)) + (0,tableRectangle.height)
+		
+		return (topLeft, bottomRight)
+	end if
+end columnSearchRectangle
+
+(** DEPRECATED! Return the search rectangle enclosing the desired Row in the Registry Forecast's Immunization History or Immunization Forecaster Table Section content
+@param tableName - the name of the table in which the row needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@param columnHeader - the name of the column
+@param text - the text that needs to be searched to form a row
+@return - coordinates of the SearchRectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".rowSearchRectangle(tableName, columnHeader, text)
+**)
+function rowSearchRectangle tableName, columnHeader, text
+	LogWarning "DPRECATED Handler: " & return & <<"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".rowSearchRectangle(tableName, columnHeader, text)>>
+	
+	set textRectangle to imageRectangle(text: text, SearchRectangle:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".columnSearchRectangle(tableName, columnHeader))
+	
+	set topLeft to (textRectangle.topLeft + (-5,-5))
+	set bottomRight to (imageLocation("Immunizations/WorkflowMPage/Search/BR_header").x, textRectangle.bottomRight.y+4)
+	
+	return(topLeft, bottomRight)
+end rowSearchRectangle
+
+(** Return the search rectangle that should enclose the Immunization Forecast or Immunization History Table headers appear in upper area of View Registry Forecast Modal so that maximum content is visible while scrolling
+@return - coordinates of the SearchRectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".contentTableTitleProbableLocationSearchRectangle()
+**)
+function contentTableTitleProbableLocationSearchRectangle
+	return (imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/LabelHeader_ViewRegistryForecast", waitFor:20)+(-95,13), imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/Button_Close", waitFor:15)+(19,450))
+end contentTableTitleProbableLocationSearchRectangle
+
+(** Return the search rectangle enclosing the vertical scroll bars in the 'View Registry Forecast' modal
+@return - coordinates of the SearchRectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".verticalScrollBarSearchRectangle()
+**)
+function verticalScrollBarSearchRectangle
+	return (imageRectangle(image:"Immunizations/WorkflowMPage/Reconciliation/Common/Button_Close", waitFor:15) + (5,25, 15, 660))
+end verticalScrollBarSearchRectangle
+
+(** Scroll through the modal till the desired text in found in a given table
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecast'
+@param columnName - the particular column where the text may appear
+@param text - the text to be searched in the given table's column
+@Handler
+    run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".scrollListUntilTextFound tableName, columnRectangle, text
+**)
+to scrollListUntilTextFound tableName, columnName, text
+	set verticalScrollBarRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".verticalScrollBarSearchRectangle()
+	
+	(*Check if scroll bar is present and proceed with scrolling only if scrollbars are present*)
+	if (imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_VertScrollUp", searchRectangle: verticalScrollBarRectangle))
+		set scrollUpButtonLocation to imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_VertScrollUp", searchRectangle: verticalScrollBarRectangle)
+		set scrollDownButtonLocation to imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_VertScrollDown", searchRectangle: verticalScrollBarRectangle)
+		
+		set startEndImageAnchors to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+		set contentTableTitleProbableLocationRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".contentTableTitleProbableLocationSearchRectangle()
+		
+		(*Get the start image to the top part of the modal by scrolling*)
+		repeat until (imageFound(image: startEndImageAnchors.startImage, searchRectangle: contentTableTitleProbableLocationRectangle))
+			if (imageFound(image: startEndImageAnchors.startImage, searchRectangle: contentTableTitleProbableLocationRectangle))
+				exit repeat
+			else if (imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Image_VertScrollBottomEnd", searchRectangle: verticalScrollBarRectangle))
+				repeat until (imageFound(image: startEndImageAnchors.startImage, searchRectangle: contentTableTitleProbableLocationRectangle))
+					if (imageFound(image: startEndImageAnchors.startImage, searchRectangle: contentTableTitleProbableLocationRectangle))
+						exit repeat
+					end if
+					
+					DoubleClick scrollUpButtonLocation
+					moveTo (0,0)
+				end repeat
+				
+				exit repeat
+			end if
+			
+			DoubleClick scrollDownButtonLocation
+			moveTo (0,0)
+		end repeat
+		
+		(*Scroll upto the end image while checking if the text is found*)
+		repeat until (imageFound(text: text, searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, columnName)))
+			if (imageFound(text: text, searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, columnName)))
+				Log "Found '" & text & "' in" & "'" & columnName & "' column."
+				exit repeat
+			else if (imageFound(image: startEndImageAnchors.endImage))
+				Log "Reached to the end image, scrolling upto start image."
+				repeat until (imageFound(text: text, searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, columnName)))
+					if (imageFound(image: startEndImageAnchors.startImage, searchRectangle: contentTableTitleProbableLocationRectangle))
+						LogWarning "Reached to the top of '" & tableName & "'. '" & text & "' Not Found in '" & columnName & "' column."
+						exit repeat
+					end if
+					
+					click scrollUpButtonLocation
+				end repeat
+				
+				exit repeat
+			end if
+			
+			click scrollDownButtonLocation
+		end repeat
+	end if
+end scrollListUntilTextFound
+
+(** Set the start and end points (anchor images) of the given table
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@return - property list of the start and end points (anchor images)
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+**)
+function getStartAndEndPoints tableName
+	if tableName is in (empty, "")
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecaster'"
+	else
+		if tableName is "Immunization History" ignoring case
+			return (startImage: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Label_ImmunizationHistory", endImage: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Label_ClinicalComments")
+		else if tableName is "Immunization Forecaster" ignoring case
+			return (startImage:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Label_ImmunizationForecaster", endImage: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Label_ImmunizationHistory")
+		end if
+	end if
+end getStartAndEndPoints
+
+(** set a particular column search rectangle in a given table in generic manner
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@param columnName - the Name of the column in a table
+@return - coordinates of the SearchRectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, columnName)
+**)
+function getColumnRectangleByName tableName, columnName
+	if (tableName is in (empty, "") or columnName is in (empty, ""))
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecaster'"
+	else
+		if tableName is "Immunization History" ignoring case
+			if columnName is "Vaccine" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationHistory/Helpers".immunizationHistoryVaccineColumnSearchRectangle()
+			else if columnName is "Dose" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationHistory/Helpers".immunizationHistoryDoseColumnSearchRectangle()
+			else if columnName is "Status" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationHistory/Helpers".immunizationHistoryStatusColumnSearchRectangle()
+			else if columnName is "Valid Dose" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationHistory/Helpers".immunizationHistoryValidDoseColumnSearchRectangle()
+			else if columnName is "Admin Date"
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationHistory/Helpers".immunizationHistoryAdminDateColumnSearchRectangle() 
+			end if
+		else if tableName is "Immunization Forecaster" ignoring case
+			if columnName is "Vaccine" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterVaccineColumnSearchRectangle()
+			else if columnName is "Earliest Date" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterEarliestDateColumnSearchRectangle()
+			else if columnName is "Recommended Date" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterRecommendedDateColumnSearchRectangle()
+			else if columnName is "Overdue Date" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterOverdueDateColumnSearchRectangle()
+			else if columnName is "Latest Date" ignoring case
+				return "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterLatestDateColumnSearchRectangle()
+			end if
+		end if
+	end if
+end getColumnRectangleByName
+
+(** Return the search Rectangle that might enclose the next open or closed caret. If it is the end of the row, then set the bottom to a table's endImage label image location.
+@Param vaccineNameRectangle - the search rectangle that encloses the vaccine name
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@Return - the coordinates of the search Rectangle
+@Handler
+    "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".nextCaretSearchRectangle(vaccineNameRectangle)
+**)
+function nextCaretSearchRectangle vaccineNameRectangle, tableName
+	set startEndImageAnchors to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+	
+	if (imageFound(image: startEndImageAnchors.endImage))
+		return (vaccineNameRectangle.bottomLeft + (-25,0), imageLocation(image: startEndImageAnchors.endImage)+(5,-5))
+	else
+		return ((vaccineNameRectangle.bottomLeft + (-25,0)), (vaccineNameRectangle.bottomLeft + (-1,635)))
+	end if
+end nextCaretSearchRectangle
+
+(** Scroll down until the row's end is found
+@Param vaccineName - the name of the Vaccine from the Vaccine column table that is sits in one of the rows in the Immunization Forecaster Table
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@Handler
+    run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".scrollUntilRowEndFound vaccineName
+**)
+to scrollUntilRowEndFound vaccineName, tableName
+	set startEndImageAnchors to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+	
+	repeat until (imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_Caret_Common", searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".nextCaretSearchRectangle(imageRectangle(text: vaccineName, searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterVaccineColumnSearchRectangle()), tableName)) or imageFound(image: startEndImageAnchors.endImage))
+		click image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_VertScrollDown", searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".verticalScrollBarSearchRectangle()
+	end repeat
+end scrollUntilRowEndFound
+
+(** Return the search Rectangle enclosing the given Vaccine Row from the given Table
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@Param vaccineName - the name of the Vaccine from the Vaccine column table that is sits in one of the rows in the Immunization Forecaster Table
+@Param validateInTable (OPTIONAL) - if true, validate if vaccine name exists in a given table by checking the table content Header through scrolling. If false/empty this will be skipped
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".vaccineRowSearchRectangle(tableName, vaccineName, validateInTable)
+**)
+function vaccineRowSearchRectangle tableName, vaccineName, validateInTable
+	if (tableName is in (empty, ""))
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecaster'"
+	else
+		set startEndImageAnchors to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+		
+		if validateInTable is true
+			run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".scrollListUntilTextFound tableName, "Vaccine", vaccineName
+		end if
+		
+		set vaccineColumnRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getColumnRectangleByName(tableName, "Vaccine")
+		
+		if (imageFound(text: vaccineName, searchRectangle: vaccineColumnRectangle))
+			run "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".scrollUntilRowEndFound vaccineName, tableName
+			
+			set vaccineNameRectangle to imageRectangle(text: vaccineName, searchRectangle: vaccineColumnRectangle)
+			set nextCaretRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".nextCaretSearchRectangle(vaccineNameRectangle, tableName)
+			
+			set rowTopLeft to vaccineNameRectangle.topLeft + (-25,-7)
+			if (imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_Caret_Common", searchRectangle: nextCaretRectangle))
+				set rowBottomRight to item 1 of everyImageLocation(image: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_Caret_Common", searchRectangle: nextCaretRectangle) + (1750,-15)
+			else if (imageFound(image: startEndImageAnchors.endImage))
+				set rowBottomRight to foundImageLocation() + (1750,-25)
+			end if
+			
+			return (rowTopLeft, rowBottomRight)
+		else
+			return FALSE
+		end if
+	end if
+end vaccineRowSearchRectangle
+
+(** Return the search rectangle enclosing the Registry Forecast's given Table's content.
+@param tableName - the name of the table in which the column needs to be searched for, must be sent as 'Immunization History' OR 'Immunization Forecaster'
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle(tableName)
+**)
+function tableContentSearchRectangle tableName
+	if (tableName is in (empty, ""))
+		LogError "tableName must be sent as 'Immunization History' OR 'Immunization Forecaster'"
+	else
+		set startEndImageAnchors to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".getStartAndEndPoints(tableName)
+		
+		if (imageFound(image: startEndImageAnchors.startImage))
+			set topLeft to foundImageLocation()+(-35,10)
+		else
+			set topLeft to imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/LabelHeader_ViewRegistryForecast", waitFor:20)+(-90,13)
+		end if
+		
+		if (imageFound(image: startEndImageAnchors.endImage))
+			set bottomRight to foundImageLocation()+(1750,-20)
+		else
+			set bottomRight to imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Button_Back")+(1760,-20)
+		end if
+		
+		if (imageFound(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Icon_VertScrollUp", searchRectangle: "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".verticalScrollBarSearchRectangle()) )
+			set bottomRight to bottomRight + (-17,0)
+		end if
+		
+		return (topLeft, bottomRight)
+	end if
+end tableContentSearchRectangle

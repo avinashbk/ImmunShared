@@ -1,0 +1,23 @@
+﻿(*
+This handler builds a rectangle to verify the the Refine Dialog 
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".RefineDialogRectangle
+*)
+function refineDialogRectangle
+	return (imageLocation("Immunizations/WorkflowMPage/Reconciliation/Refine/TL_Dialog"), imageLocation("Immunizations/WorkflowMPage/Reconciliation/Refine/BR_Dialog"))
+end refineDialogRectangle
+
+(**
+@param Rectangle to store the readtext of the Top left and bottom right of the date of birth field for the Refine Dialog
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".dateOfBirthSearchRectangle**)
+Function dateOfBirthSearchRectangle 
+	set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".refineDialogRectangle
+	return((ImageRectangle(text:"Date of birth:",SearchRectangle:rectangle).topLeft+(150,0)),(ImageRectangle(text:"Date of birth:",SearchRectangle:rectangle).bottomRight+(180,15)))
+end dateOfBirthSearchRectangle
+
+(**
+@param Rectangle to store the readtext of the Top left and bottom right of the other populated fields for the Refine Dialog
+set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".populatedFieldsSearchRectangle fieldName**)
+Function populatedFieldsSearchRectangle fieldName
+	set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".refineDialogRectangle
+	return((ImageRectangle(text:fieldName,SearchRectangle:rectangle).topLeft+(150,0)),(ImageRectangle(text:fieldName,SearchRectangle:rectangle).bottomRight+(320,15)))
+end populatedFieldsSearchRectangle

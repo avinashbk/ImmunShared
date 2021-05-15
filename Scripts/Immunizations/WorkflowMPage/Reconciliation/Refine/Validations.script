@@ -1,0 +1,18 @@
+﻿(**Uses field label with text and index to validate the field value
+@Param label the field label you are wanting to validate
+@Param refineDialogRectangle - search rectangle for the entire Refine dialog
+@Param image for the Helper text and Character count
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/Refine/Validations".verifyRefineErrorMessage  label, refineDialogRectangle, image**)
+On verifyRefineErrorMessage label, refineDialogRectangle, image
+	set rectangle to (ImageLocation(text:label, SearchRectangle:(refineDialogRectangle))+(125,0))
+	run "Immunizations/Util/Validation".verifyImage Image, refineDialogRectangle
+End verifyRefineErrorMessage
+
+(**Uses field label with text and index to validate the field value
+@Param label the field you are wanting to validate
+@Param refineDialogRectangle - search rectangle for the entire Refine Dialog
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/Refine/Validations".verifyRefineFields field, refineDialogRectangle**)
+On verifyRefineFields  field, refineDialogRectangle
+	set refineDialogRectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".RefineDialogRectangle
+	run "Immunizations/Util/Validation".verifyText field, refineDialogRectangle
+End verifyRefineFields

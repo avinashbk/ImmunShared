@@ -1,0 +1,91 @@
+﻿(**Interaction script for the ChartNotGivenDialog functionality
+Opens ChartNotGiven dialog from either the MPage or Forecaster 
+@Handler run "Immunizations/Common/ChartNotGiven/Actions".openDialog**)
+On OpenDialog
+	If imageFound(image: "Immunizations/WorkflowMPage/Table/Button")
+		Click FoundimageLocation()
+		Click Text:"Chart Not Given",searchRectangle:("Immunizations/WorkflowMPage/Table/TL_PlusSignDropDown", "Immunizations/WorkflowMPage/Table/BR_PlusSignDropDown")
+	Else
+		Click imageLocation(Text:"Chart Not Given", searchrectangle:(238,796,1911,1075))
+	End If 
+	waitFor 30, "Immunizations/Common/ChartNotGiven/TL_Dialog"
+End OpenDialog
+
+
+(**For completing the required details for chart not given dialog
+@param NotGivenType to be selected
+@param NotGivenReason to be selected
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/Common/ChartNotGiven/Actions".RequiredInput notGivenType,action,notGivenReason**)
+On RequiredInput notGivenType,action,notGivenReason
+	Set Rectangle to "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle 
+	Log "MPages 6.9 and higher version of MPages"
+	//For clicking on the Not Given type
+	Click imageLocation(text:"Not Given Type",searchRectangle:Rectangle)+(30,30)
+	Click text:NotGivenType,searchRectangle:Rectangle
+	wait 1
+	//For clicking RescheduleDate or cancel forecasting
+	Click ImageLocation(Text:Action, searchRectangle:(Rectangle))
+	Wait 1
+	//For clicking the Not Given Reason
+	Click imageLocation(text:"Not Given Reason",searchRectangle:Rectangle)+(30,30)
+	Click text: NotGivenReason, searchRectangle:Rectangle
+End RequiredInput
+
+(**Tab to get to the Reshedule for Field to be selected
+@param RescheduleDate to be selected
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/Common/ChartNotGiven/Actions".RescheduleDateInput rescheduleDate
+**)
+On RescheduleDateInput RescheduleDate
+	Set Rectangle to "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle 
+	Log "MPages 6.9 and higher version of MPages"
+	//For clicking the Reschedule button
+	Click imageLocation(Text:"Reschedule Date",searchRectangle:Rectangle)
+	TypeText tabKey
+	Typetext rightArrow, rightArrow,rightArrow
+	TypeText backspace,backspace
+	TypeText formattedTime("%m",RescheduleDate)
+	TypeText tabKey
+	TypeText formattedTime("%d",RescheduleDate)
+	TypeText tabKey
+	TypeText year of RescheduleDate
+	TypeText tabKey
+End RescheduleDateInput
+
+(**Tab to get to the Authorized by date Field to be selected
+@param AuthorizedDate to be selected 
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/ChartNotGiven/Actions".AuthorizedDateInput authorizedDate"
+**)
+On AuthorizedDateInput authorizedDate
+	Set Rectangle to "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle 
+	Log "MPages 6.9 and higher version of MPages" 
+	//For clicking authorized date
+	Click imageLocation(text:"Authorized Date",searchRectangle:Rectangle)+(-40,30)
+	//TypeText tabKey
+	typetext rightArrow, rightArrow
+	TypeText backspace,backspace
+	typetext controlKey &"a"
+	TypeText formattedTime("%m",AuthorizedDate)
+	TypeText tabKey
+	typetext controlKey &"a"
+	TypeText formattedTime("%d",AuthorizedDate)
+	TypeText tabKey
+	typetext controlKey &"a"
+	TypeText year of AuthorizedDate
+	TypeText tabKey
+End AuthorizedDateInput
+
+(**Comment to be entered
+@param comment to enter the comments for not given charted
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/ChartNotGiven/Actions".commentInput"
+**)
+On commentInput comment
+	Set Rectangle to "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle 
+	Log "MPages 6.9 and higher version of MPages"
+	//For clicking the comments
+	Click imageLocation(text:"Comments",searchRectangle:Rectangle)+(30,30)
+	Typetext comment
+End commentInput

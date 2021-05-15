@@ -1,0 +1,111 @@
+﻿(**Interaction script for the DocumentHistory functionality**)
+
+(**Opens Document History dialog from either the MPage or Forecaster 
+@Handler run "Immunizations/Common/DocumentHistory/Actions".OpenDialog**)
+On openDialog
+	If imageFound(image:"Immunizations/WorkflowMPage/Table/Button/PlusSign")
+		Click FoundimageLocation()
+		Click Text:"Document History", searchrectangle:("Immunizations/WorkflowMPage/Table/TL_PlusSignDropDown", "Immunizations/WorkflowMPage/Table/BR_PlusSignDropDown")
+	Else	
+		Click imageLocation(Text:"Document History", searchrectangle:(238,796,1911,1075))
+	End If
+End openDialog
+
+(**Fills in required details for document history
+@Param vaccineName the vaccineName group to be selected
+@Param DateFormat the date format to be selected
+@Param adminDate the administration date to be entered
+@Param source the source to be selected
+@Param rectangle the area to search for the text in the dialog
+@Handler run "Immunizations/Common/DocumentHistory/Actions".RequiredInput vaccineName, dateFormat, adminDate, source**)
+On requiredInput vaccineName, dateFormat, adminDate, source
+	Set rectangle to "Immunizations/Common/DocumentHistory/Helpers".DialogSearchrectangle
+	LOG "MPages Version 6.9 or possibly higher is being used"
+	//Click in the Historical Entry dialog to put it in focus for tabbing to each field
+	Click (text: vaccineName, searchrectangle:(rectangle))
+	//Click to get to the Date format list for Administration Date
+	Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(0,20)
+	Wait 1
+	Typetext DateFormat,returnKey	
+	//Tab to get to the Administration Date text input field for Administration Date
+	If DateFormat is "Date"
+		typeText tabKey
+		typeText formattedTime("%m", adminDate)
+		TypeText tabKey
+		TypeText formattedTime("%d", adminDate)
+		TypeText tabKey
+		typetext year of adminDate
+	Else If DateFormat is "Week of"
+		typeText tabKey
+		typeText formattedTime("%m", adminDate)
+		TypeText tabKey
+		TypeText formattedTime("%d", adminDate)
+		TypeText tabKey
+		typetext year of adminDate
+		//Click to get to the Date format list for Administration Date
+		Set rectangle to "Immunizations/Common/DocumentHistory/Helpers".DialogSearchrectangle
+		Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(0,20)
+		Wait 1
+		Click imageLocation(Text:"Month", searchrectangle:(rectangle),validCharacters:"Month")
+		Wait 3
+		Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(0,20)
+		Wait 1
+		Click imageLocation(Text:"Week", searchrectangle:(rectangle),validCharacters:"Week")
+		wait 2
+		Click imageLocation(Text:"Source",dpi:144, searchrectangle:(rectangle))+(0,30)
+	Else If DateFormat is "Month/Year"
+		Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(40,20) 
+		MoveTo imageLocation(Text:"Product", searchrectangle:(rectangle))
+		typetext formattedTime("%b", adminDate),returnKey
+		TypeText tabKey
+		typetext year of adminDate
+		Else If DateFormat is "Year"
+		TypeText tabKey
+		typetext year of adminDate	
+	End If
+	//Enter source information
+	Wait 5
+	typeText Tabkey 
+	typeText Tabkey
+	Click imageLocation(Text:"Source",dpi:144, searchrectangle:(rectangle))+(0,30)
+	MoveTo imageLocation(Text:"Administration Date", searchrectangle:(rectangle))
+	Click text:source, searchrectangle:(rectangle + ((0,0), (0,130))) 
+End RequiredInput
+
+(**Tab to get to the Product field"Product" and click a product
+@Param Product the product to be selected
+@Param rectangle the area to search for the text in the dialog
+@Handler run "Immunizations/Common/DocumentHistory/Actions".ProductInput product**)
+On ProductInput product
+	Set rectangle to  "Immunizations/Common/DocumentHistory/Helpers".productSearchRectangle
+	LOG "MPages Version 6.9 or possibly higher is being used"
+	Click imageLocation(Text:"Product", searchrectangle:(rectangle))+(0,20)
+	Wait 1
+	TypeText product
+	TypeText returnKey
+End ProductInput
+
+(**Fills in all the details in details section for document history
+@Param Field is the field name whose value has to be entered
+@Param Value is the data to enter
+@Handler run "Immunizations/Common/DocumentHistory/Actions".EnterDetailsInput Field, Value**)
+On EnterDetailsInput Field, Value
+	Set rectangle to "Immunizations/Common/DocumentHistory/Helpers".DialogSearchRectangle
+	Repeat until Found is True
+		click image: "Immunizations/Common/DocumentHistory/ScrollBarDownArrow", searchRectangle: rectangle
+		Put ImageFound(0,Text:Field,SearchRectangle:Rectangle) into Found
+		
+		If Found is True
+			click image: "Immunizations/Common/DocumentHistory/ScrollBarDownArrow", searchRectangle: rectangle
+			Set FieldArea to "Immunizations/Common/DocumentHistory/Helpers".DialogSearchRectangle
+			Click imageLocation(Text:Field, searchrectangle:(FieldArea))+(0,23)
+			Typetext Value, returnKey
+		End If
+		
+		If the repeatIndex > 10
+			LogError "Input field not found"
+			Exit Repeat
+		End If
+	End Repeat
+	click image: "Immunizations/Common/DocumentHistory/ScrollBarDownArrow", searchRectangle: rectangle
+End EnterDetailsInput

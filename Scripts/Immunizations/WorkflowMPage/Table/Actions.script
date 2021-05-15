@@ -1,0 +1,50 @@
+﻿(**Selecting vaccineName group from the table in the Immunizations MPage
+@param vaccineName the vaccineName group to be selected
+@Handler run "Immunizations/WorkflowMPage/Table/Actions".clickVaccineGroupName vaccineName**)
+
+On clickVaccineGroupName vaccineName
+	WaitFor 300, text:"View Forecast", searchRectangle: "Immunizations/Common/Helpers".tabListSearchRectangle
+	Click imageLocation(Text:vaccineName, searchRectangle:(imageLocation(image:"Immunizations/WorkflowMPage/Table/TL_Workflow", waitFor:300), imageLocation(image:"Immunizations/WorkflowMPage/Table/BR_Workflow", waitFor:300)), waitFor:30)
+End clickVaccineGroupName
+
+
+(**Clicking View Forecast Button from the Immunizations MPage
+@param Text the text to be selected which is the View Forecast Button from WorkFlow MPage
+@Handler run "Immunizations/WorkflowMPage/Table/Actions".clickViewForecast**)
+
+On clickViewForecast text
+	Set topPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	Click (Text:text, searchRectangle:topPaneRectangle)
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+	if not ImageFound(Image:"Immunizations/Forecaster-Forecast/Button/DocumentHistory", searchrectangle:(238,796,1911,1075))
+		Click imageLocation(imageName:"Immunizations/Forecaster-Forecast/Common/Hamburger_Button",searchRectangle:TopPaneRectangle)
+		logwarning "Unable to find 'Document History Button."
+	else
+		// added this check to make sure we have correctly moved to Forecaster-Forecast or Forecaster-List View
+		waitFor 30, Text:"Document History", searchrectangle:(238,796,1911,1075), dpi:150
+	end if
+End clickViewForecast
+
+(**Clicking Reconcile button to open reconciliation from the mpage
+@Handler 
+     run "Immunizations/WorkflowMPage/Table/Actions".clickReconcileBanners**)
+On clickReconcileBanners
+	Set topPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	Click (image:"Immunizations/WorkflowMPage/Table/View_Records_Button", searchRectangle:topPaneRectangle)
+	waitFor 15, "Immunizations/WorkflowMPage/Reconciliation/Headers/Outside_Records_Text"
+End clickReconcileBanners
+
+(**Clicking Reconcile button to open reconciliation from the mpage
+@Handler 
+     run "Immunizations/WorkflowMPage/Table/Actions".clickReconcileHyperlink**)
+On clickReconcileHyperlink
+	Set rectangle to imageRectangle("Immunizations/WorkflowMPage/Table/TL_Workflow") + (0, 380, 1875, 550)
+	Click (image:"Immunizations/WorkflowMPage/Table/View_Outside_Records_Hyperlink", searchRectangle:rectangle)
+	waitFor 15, "Immunizations/WorkflowMPage/Reconciliation/Headers/Outside_Records_Text"
+End clickReconcileHyperlink
+
+
+
+
+
+

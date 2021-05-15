@@ -1,0 +1,22 @@
+﻿(**Checks to ensure the no vaccine history displays
+@Handler run "Immunizations/Forecaster-List/Validations".VerifyNoVaccineHistory**)
+
+On VerifyNoVaccineHistory 
+	if imageFound(image:"Immunizations/Forecaster-Forecast/List" ,SearchRectangle:("Immunizations/Search/TL_TabList", "Immunizations/Forecaster-Forecast/List/BR_List"))
+		LogSuccess "No Vaccine History Image Found"
+	Else
+		LogError "No Vaccine History Image did not Found"
+	end if
+End VerifyNoVaccineHistory
+
+(**Checks to ensure how many Action columns are present on the list view
+@Param Text - numOfActionColumn - Number of Action columns like 1,2,3 etc. which is to be validated
+@Handler run "Immunizations/Forecaster-List/Validations".verifyActionColumnCount numOfActionColumn**)
+
+On verifyActionColumnCount numOfActionColumn
+	Set rowSearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".rowSearchRectangle("Vaccine") 
+	put EveryImageLocation(text:"Action",SearchRectangle:rowSearchRectangle, preferredWords:"Action",EnableAggressiveTextExtraction:Yes) into ActionList
+	put the number of items of ActionList into actionCount
+	run "Immunizations/Util/Validation".verifyValueEquals actionCount, numOfActionColumn
+End verifyActionColumnCount
+

@@ -1,0 +1,452 @@
+﻿(** Return a Formated date adjusted from a given start date using a property list of parameters
+@Param StartDate - The date to adjust
+@Param Format - The Formatted time values
+@Param ParamList - A property list with the Year, Month, Week and Day represented as keys and the value for each represents the requested adjustments, all values are optional
+@Return the Formatted and adjusted date
+@Handler
+     "Immunizations/Util/Date".AdjustDate(StartDate, Format, ParamList)
+**)
+function AdjustDate StartDate, Format, ParamList
+	set AdjustedDate to StartDate
+	
+	if the keys of ParamList contains "year"
+		convert AdjustedDate to dateItems
+		add ParamList.("Year") to item 1 of AdjustedDate -- item 1 is the month
+		if (day(AdjustedDate) < day(StartDate))
+			put (AdjustedDate - day(AdjustedDate) days) into AdjustedDate
+		end if
+	end if
+	if the keys of ParamList contains "month"
+		convert AdjustedDate to dateItems
+		add ParamList.("Month") to item 2 of AdjustedDate -- item 2 is the month
+		if (day(AdjustedDate) < day(StartDate))
+			put (AdjustedDate - day(AdjustedDate) days) into AdjustedDate
+		end if
+	end if
+	if the keys of ParamList contains "Week"
+		set AdjustedDate to AdjustedDate + ParamList.("Week") week
+	end if
+	if the keys of ParamList contains "Day"
+		set AdjustedDate to AdjustedDate + ParamList.("Day") day
+	end if
+	
+	return uppercase(FormattedTime(Format, AdjustedDate))
+end AdjustDate
+
+(** Return a formatted date for today's date
+@Param format - The Formatted time\date value
+@Return the formatted and adjusted date
+@Handler
+     "Immunizations/Util/Date".todaysDate(format)
+**)
+function todaysDate format
+	set todaysDate to today's date
+	return FormattedTime(format, todaysDate)
+end todaysDate
+
+(** Returns a formatted and adjusted date for Flu season start and end Date. Since the flu season dates are dependent on the time of year (e.g If it is Aug 1st, the flu season start will be in the same year and flu season end will be in the next year. If it is Jan 1st, the flu season start will in be the previous year and flu season end will be in the current year.)
+@Param format - the date format to be set the start and end dates to
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Handler
+     set (fluSeasonStart, fluSeasonEnd) to "Immunizations/Util/Date".fluSeasonDateCalc(format,lastAdminDate)
+**)
+function fluSeasonDateCalc(format, lastAdminDate)
+	if lastAdminDate is empty 
+		set lastAdminDate to " "
+	else
+		set lastAdminDate to formattedTime(format, date(lastAdminDate))
+	end if
+	set fluSeasonStart to formattedTime(format, date("07/01/" & today's year))
+	set fluSeasonEnd to formattedTime(format, date("06/30/" & today's year))
+	if lastAdminDate >= formattedTime(format, date("06/03/" & today's year)) and if lastAdminDate < formattedTime(format, date("07/01/" & today's year))
+		set fluSeasonStart to  lastAdminDate + 4 weeks
+		set fluSeasonEnd to fluSeasonEnd
+	else if "Immunizations/Util/Date".todaysDate(format) > fluSeasonEnd
+		set fluSeasonEnd to fluSeasonEnd + 1 year
+	else 
+		set fluSeasonStart to fluSeasonStart - 1 year
+	end if
+	return (fluSeasonStart, fluSeasonEnd)
+end fluSeasonDateCalc
+
+(** Return the pattern variable set for dates
+@Param dateOrAgeValue - Can be age or date, E.g., 3m 1w   or   APR 01, 2019
+@Param format - (OPTIONAL) the date format
+@Return the coordinates of a search rectangle
+@Handler 
+    "Immunizations/Util/Date".setSpecificPatternForDateOrAge(dateOrAgeValue, format)
+**)
+function setSpecificPatternForDateOrAge(dateOrAgeValue, format)
+	if dateOrAgeValue is not empty
+		if dateOrAgeValue contains "," 
+			set dateOrAgeColumnHeader to uppercase(dateOrAgeValue)
+			
+			if format is "%d/%b/%Y"
+				set dateOrAgePattern to "[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]"
+			else
+				set dateOrAgePattern to "[A-Z][A-Z][A-Z] [0-9][0-9], [0-9][0-9][0-9][0-9]"
+			end if
+		else
+			set dateOrAgePattern to "Immunizations/Util/Date".setPattern(dateOrAgeValue)
+		end if
+		
+		return dateOrAgePattern
+	else
+		return ""
+	end if
+end setSpecificPatternForDateOrAge
+
+(** Sets the pattern for a given set of text including numbers.)
+@Param text - The text including numbers that requires setting the pattern for
+@Return pattern for a given set of text that includes numbers
+@Usage Examples:
+	set age to "Immunizations/Util/Date".ageCalculator (dob, "Immunizations/Util/Date".adjustDate(dob, format, ("Year":11)), "false", "false")
+	set pattern to "Immunizations/Util/Date".setPattern(age)
+	set rightPaneBodySearchRectangle to "Immunizations/Forecaster-Forecast/Helpers".expandedViewRightPaneBodySearchRectangle()
+	set minimumFieldRectangle to "Immunizations/Common/Helpers".fieldValueSearchRectangle(minimum, rightPaneBodySearchRectangle)
+	run "Immunizations/Util/Validation".verifyTextWithPattern age, pattern, minimumFieldRectangle
+@Handler
+     set pattern to "Immunizations/Util/Date".setPattern(text)
+**)
+function setPattern text
+	put text into pattern
+	
+	// making a complete regex, as reserved characters were not being matched
+	replace every occurrence of "\" in pattern with "\\"
+	replace every occurrence of "^" in pattern with "\^"
+	replace every occurrence of "$" in pattern with "\$"
+	replace every occurrence of "." in pattern with "\."
+	replace every occurrence of "|" in pattern with "\|"
+	replace every occurrence of "?" in pattern with "\?"
+	replace every occurrence of "*" in pattern with "\*"
+	replace every occurrence of "+" in pattern with "\+"
+	replace every occurrence of "(" in pattern with "\("
+	replace every occurrence of ")" in pattern with "\)"
+	replace every occurrence of "[" in pattern with "\["
+	replace every occurrence of "]" in pattern with "\]"
+	replace every occurrence of "{" in pattern with "\{"
+	replace every occurrence of "}" in pattern with "\}"
+	
+	// replace digits with [0-9] after the above reserved regex symbols are repalced 
+	replace every occurrence of <1 digit> in pattern with "[0-9]"
+	
+	return pattern
+end setPattern
+
+(** Calculates the Age Based on the birthdate, and the targeted date in the immunizations component. Depending on the age of the patient, it will defer the Age display to one of the function handlers.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param dob - The date of birth 
+@Param targetDate - the date of which age will be calculated against
+@Param displayFullFormat - Whether or not you would like the age to display as a full format (e.g 14m 3w full format would be 14 months 3 weeks). This is a boolean parameter (i.e true or false).
+@Param displayWithParenthesis - Whether or not you would like the age to display with parenthesis (e.g 14m 3w as (14m 3w) ). This is a boolean parameter (i.e true or false).
+
+@Handler
+     set Age to "Immunizations/Util/Date".ageCalculator (dob, targetDate, displayFullFormat, displayWithParenthesis)
+**)
+function ageCalculator (dob, targetDate, displayFullFormat, displayWithParenthesis)
+	-- Time in Seconds
+	set oneDay to (60 * 60 * 24)
+	set oneWeek to (oneDay * 7)
+	-- Delta time in Seconds
+	set timeDiff to round(seconds(targetDate) - seconds(dob))	
+	-- Subtract 1 second to account for the patient's DOB including some time value, which will ultimately end up displaying 1 day less in the calculation
+	//subtract 1 from timeDiff
+	-- Convert to different units
+	set timeDiffInDays to (timeDiff / oneDay) - ((timeDiff / oneDay) mod (1))
+	set timeDiffInWeeks to (timeDiff / oneWeek) - ((timeDiff / oneWeek) mod (1))
+	set timeDiffInMonths to "Immunizations/Util/Date".calcMonthsDiff (dob, targetDate) 
+	set timeDiffInYears to (timeDiffInMonths/12) - ((timeDiffInMonths/12) mod (1))  //floor calc workaround
+	set age to ""
+	if timeDiffInYears >= 2 
+		set age to  "Immunizations/Util/Date".calcYearMonth (dob, targetDate, timeDiffInYears,displayFullFormat)
+	else if timeDiffInMonths >= 2 
+		set age to "Immunizations/Util/Date".calcMonthWeek (timeDiffInMonths, displayFullFormat)
+	else if timeDiffInWeeks >= 2
+		set age to "Immunizations/Util/Date". calcWeekDay (timeDiffInWeeks, timeDiffInDays, displayFullFormat)
+	else if (timeDiffInDays >= 1)
+		if (displayFullFormat)
+			set age to createFullDayString(timeDiffInDays)
+		else 
+			set age to  timeDiffInDays & "d"
+		end if
+	else 
+		if (displayFullFormat)  
+			set age to "<24 hours"
+		else 
+			set age to "<24hrs"
+		end if 
+	end if
+	if (displayWithParenthesis)
+		return "(" & age  & ")"
+	end if
+	
+	return age
+end ageCalculator
+
+(** Calculates the month difference based on the birthdate, and the targeted date in the immunizations component.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param dob - The date of birth 
+@Param targetDate - the date of which age will be calculated against
+@Handler
+     set Age to "Immunizations/Util/Date".ageCalculator (dob, targetDate)
+**)
+function calcMonthsDiff (dob, targetDate)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	set targetYears to year(targetDate)
+	set targetMonths to month(targetDate)
+	set targetDays to day(targetDate)
+	set birthMonths to month(dob)
+	set birthDays to day(dob)
+	//True/False variables being initialized to 0 (false). If they are true, they will be marked as 1 to be used in the equation directely before returning monthdiff.
+	set removecurryear to 0 
+	set removecurrmonth to 0 
+	//Initially setting monthdiff to 0 so it can be determined by the conditions below. 
+	set monthdiff to 0 
+	
+	if targetMonths > birthMonths
+		set monthdiff to targetMonths - birthMonths
+		if targetDays < birthDays
+			set removecurrmonth to 1 	
+		end if 
+	else if targetMonths < birthMonths
+		set monthdiff to 12 - (birthMonths - targetMonths)
+		set removecurryear to 1 
+		if targetDays <  birthDays
+			set removecurrmonth to 1
+		end if 
+	else if targetDays < birthDays
+		set removecurryear  to 1
+		set monthdiff to 11
+	end if
+	
+	set days to targetDays - birthDays
+	if days < 0 
+		put targetYears & "-" & (birthMonths + 1) & "-01" into newDate
+		subtract 1 day from newDate
+		set days to day(newDate) 
+		subtract birthDays from days
+		add targetDays to days
+	end if 
+	
+	set fourDigitYearDiff to year(targetDate) - year(dob)
+	add ((fourDigitYearDiff - removecurryear) * 12) + ((days/32) - removecurrmonth) to monthdiff 
+	return monthdiff
+end calcMonthsDiff
+
+(** Returns the Age when the age is greater than 2.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param dob - The date of birth 
+@Param targetDate - the date of which age will be calculated against
+@Param timeDiffInYears - Difference in the years between the 2 dates based on the month calculation
+@Param displayFullFormat - Whether or not you would like the age to display as a full format (e.g 14y 3m full format would be 14 years 3 months).
+@Handler
+     set Age to "Immunizations/Util/Date".calcYearMonth (dob, targetDate, timeDiffInYears)
+**)
+function calcYearMonth (dob, targetDate, timeDiffInYears, displayFullFormat)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	set targetMonths to  month(targetDate)
+	set targetDays to day(targetDate)
+	set birthMonths to month(dob)
+	set birthDays to day(dob)
+	set months to targetMonths - birthMonths 
+	set days to targetDays - birthDays
+	
+	if days < 0 
+		subtract 1 from months 
+	end if 
+	
+	if months < 0 
+		add 12 to months
+	end if
+	
+	-- If both yearDiff and monthDiff not equal to zero,display as #yrs #m
+	-- If monthDiff is zero, display as #yrs
+	set yearString to ""
+	set monthString to ""
+	
+	if (displayFullFormat)
+		set yearString to timeDiffInYears & " years"
+		set monthString to createFullMonthString(months)
+	else 
+		set yearString to timeDiffInYears & "yrs"
+		if months is not equal to 0
+			set monthString to months & "m"
+		end if
+	end if 
+	
+	if (monthString is not equal to "")
+		return  yearString & " " & monthString
+	end if
+	
+	return yearString
+end calcYearMonth
+
+(** Returns the Age when the age is between 2 months in 2 years.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param timeDiffInMonths - month calculation handled in calcMonthsDiff handler
+@Param displayFullFormat - Whether or not you would like the age to display as a full format (e.g 14m 3w full format would be 14 months 3 weeks).
+@Handler
+set Age to "Immunizations/Util/Date".calcMonthWeek(timeDiffInMonths, displayFullFormat)
+**)
+function calcMonthWeek (timeDiffInMonths, displayFullFormat)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	set timeDiffInMonthsMod to timeDiffInMonths mod(1) //need this mod value for weekDiffCalc
+	subtract timeDiffInMonthsMod from timeDiffInMonths//floor calc workaround
+	set weekDiffCalc to ((timeDiffInMonthsMod) * 32 / 7)
+	set weekDiffCalc to weekDiffCalc- (weekDiffCalc mod(1))
+	set monthString to ""
+	set weekString to ""
+	
+	if (displayFullFormat)
+		set monthString to createFullMonthString(timeDiffInMonths)
+		set weekString to createFullWeekString(weekDiffCalc)
+	else
+		set monthString to timeDiffInMonths & "m"
+		if (weekDiffCalc is not equal to 0)
+			set weekString to weekDiffCalc & "w"
+		end if
+	end if
+	
+	if (weekString is not equal to "")
+		return monthString & " " & weekString 
+	end if
+	
+	return monthString 
+end calcMonthWeek
+
+(** Returns the Age when the age is between 2 weeks and 2 months.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param timeDiffInWeeks - Time difference weeks based on the day calculation
+@Param timeDiffInDays - Eggplant calculation to determine the definitive time between 2 dates in day format  
+@Param displayFullFormat - Whether or not you would like the age to display as a full format (e.g 4w 3d full format would be 4 weeks 3 days).
+@Handler
+     set Age to "Immunizations/Util/Date".calcWeekDay (timeDiffInWeeks, timeDiffInDays)
+**)
+function calcWeekDay (timeDiffInWeeks, timeDiffInDays, displayFullFormat)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	set dayCalc to timeDiffInDays - (timeDiffInWeeks*7)
+	set weekString to ""
+	set dayString to ""
+	
+	if (displayFullFormat)
+		set weekString to createFullWeekString(timeDiffInWeeks)
+		set dayString to createFullDayString(dayCalc)
+	else
+		// timeDiffInWeeks is never zero because when any age less than 1 week should
+		// not refer to this function
+		set weekString to timeDiffInWeeks & "w"
+		if (dayCalc is not equal to 0)
+			set dayString to dayCalc & "d"
+		end if
+	end if
+	
+	if (dayString is not equal to "")
+		return weekString & " " & dayString 
+	end if
+	
+	return weekString
+end calcWeekDay
+
+(** If the boolean "displayFullFormat" is set to true, this handler will set the month display to the full format and determine whether or not it is plural.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param timeDiffInMonths - Time difference in months 
+@Handler
+     "Immunizations/Util/Date".createFullMonthString (monthVal)
+**)
+function createFullMonthString (timeDiffInMonths)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	if timeDiffInMonths > 0
+		if timeDiffInMonths = 1
+			return timeDiffInMonths & " month"
+		else
+			return timeDiffInMonths & " months"
+		end if
+	end if
+	return ""
+end createFullMonthString
+
+(** If the boolean "displayFullFormat" is set to true, this handler will set the week display to the full format and determine whether or not it is plural.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param timeDiffInWeeks - Time difference in weeks
+@Handler
+     "Immunizations/Util/Date".createFullWeekString (timeDiffInWeeks)
+**)
+function createFullWeekString (timeDiffInWeeks)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	if timeDiffInWeeks > 0
+		if timeDiffInWeeks = 1
+			return timeDiffInWeeks & " week"
+		else
+			return timeDiffInWeeks & " weeks"
+		end if
+	end if
+	return ""
+end createFullWeekString
+
+(** If the boolean "displayFullFormat" is set to true, this handler will set the day display to the full format and determine whether or not it is plural.)
+@Return the formatted formatted and adjusted flu season start and end dates depending on the time of the year
+@Param dayCalc - Time difference in days
+@Handler
+     "Immunizations/Util/Date".createFullDayString (dayCalc)
+**)
+function createFullDayString (dayCalc)
+	// Do not use this function on it's own. This function is intended to be used as part of the ageCalculator handler
+	if dayCalc > 0
+		if dayCalc = 1
+			return dayCalc & " day"
+		else
+			return dayCalc & " days"
+		end if
+	end if
+	return ""
+end createFullDayString
+
+(**Handler to get the current time of the SUT)
+@Returns the current time of SUT
+@Handler "Immunizations/Util/Date".getSUTTime
+**)
+function getSUTTime
+	set the RemoteClipboard to empty
+	// open command prompt
+	typeText windowsKey,"r"
+	wait 1
+	typeText "cmd.exe", returnKey
+	// put the current time of the SUT into clipboard
+	typeText "time /t | clip", returnKey
+	// exit command prompt 
+	typeText "exit", returnKey
+	
+	// parse through the selected text to get the SUT time
+	put split(trim(RemoteClipboard()), " ") into sutTimeLine
+	set sutTime to item 1 of sutTimeLine
+	if (item 2 of sutTimeLine contains "PM")
+		split sutTime by ":"
+		add 12 to item 1 of sutTime
+		set sutTime to item 1 of sutTime & ":" & item 2 of sutTime
+	end if
+	return sutTime
+end getSUTTime
+
+(** Checks the dates of a given administration group in Reconciliation Mode to see if they're sorted correctly
+@params localRecordTable - boolean - if this is set to true, the rectangle will build off of the local record table. If it is false, the rectangle will build on the outside record table
+@params vaccineName - the name of the vaccine group
+@params numberOfRows - how many rows are in the subsection of the vaccine group (administrations + blank rows)
+@Handler
+    run "Immunizations/Util/Date".adminDateSorted localRecordTable, vaccineName, numberOfRows
+**)
+on adminDateSorted localRecordTable, vaccineName, numberOfRows
+	set date to readText("Immunizations/WorkflowMPage/Reconciliation/Table/Helpers".vaccineColumnSearchRectangle (localRecordTable, vaccineName, numberOfRows))
+	split date by return
+	repeat for each item in date 
+		split item counter() of date by "("
+		convert trimEnd(item 1 of item counter () of date) to date
+		put IT into item counter() of newDateList
+	end repeat
+	set dateListSorted to newDateList
+	sort dateListSorted chronologically ascending
+	if dateListSorted = newDateList
+		logSuccess "The dates are sorted in ascending order"
+	else 
+		logError "the dates are not sorted in ascending order"
+	end if
+end adminDateSorted

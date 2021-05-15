@@ -1,0 +1,5 @@
+<<<<<<< HEAD
+﻿{CaptureDate = "2020-03-20 09:53:26 -0500"; CaptureHost = "jenkins box"; CaptureScreenSize = (1920, 1080); CropRectangle = "0,13,1784,44"; HasAlpha = 1; HotSpotX = 892; HotSpotY = 28; ImageDescription = <>; ImageTolerance = 95; LastKnownLocationX = 0; LastKnownLocationY = 0; OriginalLocationX = 77; OriginalLocationY = 330; Precise = 0; Pulsing = 0; Scale = 1; SearchAlgorithm = TextSmoothSquare; tags = (); }
+=======
+﻿{CaptureDate = "2020-03-20 09:53:26 -0500"; CaptureHost = "jenkins box"; CaptureScreenSize = (1920, 1080); HasAlpha = 1; HotSpotX = 892; HotSpotY = 28; LastKnownLocationX = 0; LastKnownLocationY = 0; OriginalLocationX = 77; OriginalLocationY = 330; Precise = 0; Pulsing = 0; Scale = 1; SearchAlgorithm = TextSmoothSquare; tags = (); }
+>>>>>>> 21f80cc6b66c9b3feded136130d54b421e4023e7

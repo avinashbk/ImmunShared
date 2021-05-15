@@ -1,0 +1,24 @@
+﻿(** Return the search rectangle for the complete mpage setup window
+@Return the coordinates of a search rectangle
+@Handler run "Immunizations/Util/Bedrock/MPageSetup/Helpers".mpageSetupSearchRectangle
+**)
+Function mpageSetupSearchRectangle 
+	return  (imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Title_MPageSetup") +(-50,-10),imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Button_Close")+(50,20))
+end mpageSetupSearchRectangle
+
+(** Return the search rectangle for the immunization forecasting display section on the right hand side in Define MPage Filters view in MPage Setup
+@Return the coordinates of a search rectangle
+@Handler run "Immunizations/Util/Bedrock/MPageSetup/Helpers".immunizationForecastingDisplaySearchRectangle
+**)
+Function immunizationForecastingDisplaySearchRectangle 
+	return  (imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Label_ImmunizationForcastingDisplay") +(-100,-10),imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Label_ImmunizationForcastingDisplay")+(560,500))
+end immunizationForecastingDisplaySearchRectangle
+
+(** Return the search rectangle for the complete mpage setup window on the Define MPAGE Filters View
+@Return the coordinates of a search rectangle
+@Handler run "Immunizations/Util/Bedrock/MPageSetup/Helpers".defineMPAGEFiltersSearchRectangle
+**)
+Function defineMPAGEFiltersSearchRectangle 
+	return  (imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Title_MPageSetup") +(-50,-10),imageLocation("Immunizations/Common/Bedrock/MPageSetupWindow/Button_Cancel")+(50,20))
+end defineMPAGEFiltersSearchRectangle
+

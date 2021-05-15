@@ -1,0 +1,39 @@
+﻿(**
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle**)
+
+Function DialogRectangle 
+	return (imageLocation("Immunizations/Common/ChartNotGiven/TL_Dialog"), imageLocation("Immunizations/Common/ChartNotGiven/BR_Dialog"))
+End DialogRectangle
+
+(** 
+@param Rectangle to store the bottom left and bottom right of the 'Select Action' section
+@Handler run "Immunizations/Common/ChartNotGiven/Helpers".selectActionSearchRectangle**)
+Function selectActionSearchRectangle 
+	set rectangle to  "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle
+	return (imageRectangle(text:"Select Action",SearchRectangle:rectangle,ignoreSpaces:YES).bottomLeft+(-20,0),imageRectangle(text:"Select Action",SearchRectangle:rectangle,ignoreSpaces:YES).bottomRight+(280,100))
+End selectActionSearchRectangle
+
+(** Returns the search rectangle to store the Top left and bottom left of the text which is passed
+@Param Text - The field label text which is to be passed
+@Handler run "Immunizations/Common/ChartNotGiven/Helpers".fieldLabelLeftSearchRectangle**)
+Function fieldLabelLeftSearchRectangle text
+	set rectangle to  "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle
+	return((ImageRectangle(text:text,SearchRectangle:rectangle,ignoreSpaces:YES).topLeft)+(4,-10),(ImageRectangle(text:text,SearchRectangle:rectangle,ignoreSpaces:YES).bottomLeft+(-30,10)))	
+end fieldLabelLeftSearchRectangle
+
+(**
+@param Rectangle to store the readtext of the Top left and bottom right of the 'Authorized Date' label
+@Handler run "Immunizations/Common/ChartNotGiven/Helpers".authorizedDateSearchRectangle**)
+Function authorizedDateSearchRectangle 
+	set rectangle to  "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle
+	return readtext((ImageRectangle(text:"Authorized Date",SearchRectangle:rectangle).topLeft+[-15,25]),(ImageRectangle(text:"Authorized Date",SearchRectangle:rectangle).bottomRight+[-5,35]))
+end authorizedDateSearchRectangle
+
+(**
+@param Rectangle to store the readtext of the Top left and bottom right of the 'Authorized By' label
+@Handler run "Immunizations/Common/ChartNotGiven/Helpers".authorizedBySearchRectangle**)
+Function authorizedBySearchRectangle 
+	set rectangle to  "Immunizations/Common/ChartNotGiven/Helpers".DialogRectangle
+	return  readtext((ImageRectangle(text:"Authorized By",SearchRectangle:rectangle).topLeft+(-10,25)),(ImageRectangle(text:"Authorized By",SearchRectangle:rectangle).bottomRight+(230,35)))
+end authorizedBySearchRectangle

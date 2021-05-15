@@ -1,0 +1,117 @@
+﻿(**@Param View which will change the name of the MPages view for different MPage version
+@Param viewPoint - Tab name within the MPage (usually named after viewpoint or "MPages View")
+@Handler which click on MPages view to go back to WorkflowMPage view from Forecaster as well as from List view 
+run  "Immunizations/Common/Actions".clickMPagesView viewpoint**)
+On clickMPagesView viewPoint
+	Set topPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	if viewpoint is "MPages View" and imageFound(image:"Immunizations/Forecaster-Forecast/Common/ImmunizationForecast", searchRectangle:topPaneRectangle)
+		Click FoundimageLocation()
+		Click ImageLocation(image:"Immunizations/Common/MPagesViewTab", searchRectangle:topPaneRectangle)
+		repeat until imageFound("Immunizations/WorkflowMPage/Table/TL_Workflow")
+			wait 1
+			if counter() = 15
+				run  "Immunizations/Common/Actions".temporaryRefreshClick
+				exit repeat
+			end if
+		end repeat
+	else if imageFound(image:"Immunizations/Forecaster-Forecast/Common/ImmunizationForecast", searchRectangle:topPaneRectangle)
+		Click FoundimageLocation()
+		Click Text:viewPoint,searchRectangle:topPaneRectangle
+	else
+		Click imageLocation(Text:"Immunization Forecast",searchRectangle:topPaneRectangle)
+	end if
+End clickMPagesView
+
+(**
+@Param text to click on either forecast view or list view
+@Param TopPaneRectangle to store the top left and bottom right image under the function and then call that using this param
+@Param viewMPage to verify the that it stays on the MPage view 
+@Handler "Immunizations/Common/Actions".temporaryRefreshClick
+**)
+//This is temporary handler because of the issue that we have while charting the event (https://jira2.cerner.com/browse/HMDEV-1204), once the issue is resolved will remove this handler
+On temporaryRefreshClick 
+	wait 10
+	Set TopPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	if imageFound(10,image: "Immunizations/Forecaster-Forecast/GreyForecastButton") or imageFound("Immunizations/Forecaster-Forecast/DarkGreyForecastButton")
+		Click ("Immunizations/Common/Icon_Refresh")
+		
+		run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+		
+		WaitFor 300, text:"View Forecast", searchRectangle:topPaneRectangle
+		wait 5
+		run "Immunizations/WorkflowMPage/Table/Actions".clickViewForecast "View Forecast"
+	else if imageFound(10,image:"Immunizations/Forecast-List/List_Button") or imageFound("Immunizations/Forecast-List/DarkList_Button")
+		Click ("Immunizations/Common/Icon_Refresh")
+		
+		run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+		
+		WaitFor 300, text:"View Forecast", searchRectangle:topPaneRectangle
+		wait 5 
+		run "Immunizations/WorkflowMPage/Table/Actions".clickViewForecast "View Forecast"
+		Click Text:"List",searchRectangle:TopPaneRectangle
+		MoveTo (0,0)
+	else
+		Click ("Immunizations/Common/Icon_Refresh")
+		
+		run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+		
+		wait 15
+		WaitFor 300, text:"View Forecast", searchRectangle:topPaneRectangle
+	end if
+End temporaryRefreshClick
+
+(** TEMPORARY bypass the Server Down error message dialog that pops up while refreshing, documenting, uncharting and modifying an administration in some domains
+@Param jira - the JIRA issue key assigned to this issue.
+@Handler
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg jira
+**)
+on temporaryBypassServerDownErrorDlg jira
+	set rectangle to imageRectangle(image: "Immunizations/Common/TL_TopPane", waitFor: 30) + (400,0,1100,400)
+	
+	repeat for 30 seconds
+		wait 5
+		if (imageFound(image: "Immunizations/Setup/Server_down_error", waitFor: 30, searchRectangle: rectangle))
+			LogWarning "Bypassing a server error not related to our solution: https://jira2.cerner.com/browse/" & jira
+			click image:"Immunizations/Setup/Button_Close", waitFor: 5
+		else
+			exit repeat
+		end if
+	end repeat
+end temporaryBypassServerDownErrorDlg
+
+(** Types the keyboard command a set number of times
+@Param x - the number of times you need to type the keyboard key command (e.g. downArrow)
+@Param key - the keyboard key command (e.g. downArrow) that needs typed
+@Handler
+	run "Immunizations/Common/Actions".typeTextWithRepeat x, key
+**)
+on typeTextWithRepeat x, key
+	Repeat x times
+		TypeText key
+	End repeat
+end typeTextWithRepeat
+
+(** Types the keyboard command a set number of times
+@Param x - the number of times you need to type the keyboard key command (e.g. downArrow)
+@Param key - the keyboard key command (e.g. downArrow) that needs typed
+@Handler
+	run "Immunizations/Common/Actions".clickImageWithRepeat x, image
+**)
+on clickImageWithRepeat x, image
+	Repeat x times
+		click image
+	End repeat
+end clickImageWithRepeat
+
+(** Enter the field value in the Override VFC status window
+@Param field - The field label (Ex: Vaccines for Children Status/Reason for Change)
+@Param value - The value to be entered
+@Handler
+	run "Immunizations/Common/Actions".enterOverrideVFCStatusWindowFields field,value
+**)
+On enterOverrideVFCStatusWindowFields field, value
+	Set searchArea to "Immunizations/Common/Helpers".overrideVfcStatusWindowSearchRectangle
+	Click ImageLocation(text:field,SearchRectangle:searchArea) + (0,25)
+	Typetext value
+	TypeText tabkey
+End enterOverrideVFCStatusWindowFields

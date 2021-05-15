@@ -1,0 +1,56 @@
+﻿(** Return the search rectangle enclosing the Header of the Reconcile Modal. This can be used to validate the content inside the modal's header section.
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".reconcileModalHeaderSearchRectangle()
+**)
+function reconcileModalHeaderSearchRectangle
+	return (imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/TL_ReconcileModal", waitFor:15), imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/Button_Close", waitFor:15)+(19,17))
+end reconcileModalHeaderSearchRectangle
+
+(** Return the search rectangle enclosing the Footer of the Reconcile Modal. This can be used to validate the content inside the modal's footer section.
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".reconcileModalFooterSearchRectangle()
+**)
+function reconcileModalFooterSearchRectangle
+	return (imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/TL_ReconcileModal", waitFor:15)+(0,675), imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/Button_Close", waitFor:15)+(19,707))
+end reconcileModalFooterSearchRectangle
+
+(** Return the search rectangle enclosing the Tab Strip containing different Registries of the Reconcile Modal. This can be used to validate the content inside the View Registry Forecast modal's Registry Tab Strip section. A tab can be selected by clicking on it using this search rectangle. 
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".registriesTabStripSearchRectangle()
+**)
+function registriesTabStripSearchRectangle
+	return (imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/LabelHeader_ViewRegistryForecast", waitFor:20)+(-95,13), imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Common/Button_Close", waitFor:15)+(19,57))
+end registriesTabStripSearchRectangle
+
+(** Return the search rectangle enclosing the given registry Tab's name. This can be used to validate the content inside the desired Registry Tab. A tab can be check if it is highlighted or not. 
+@param tabName - the name/label text of the desired Tab in the Registries Tab Strip
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".selectedRegistryTabSearchRectangle(tabName)
+**)
+function selectedRegistryTabSearchRectangle registryTabName
+	set registriesForecastTabStripRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".registryForecastRegistriesTabStripSearchRectangle()
+	return (imageRectangle(text:registryTabName, dpi:100, enableAggressiveTextExtraction:true, ignoreSpaces:true, searchRectangle:registriesForecastTabStripRectangle) + (-15,-15, 105,15))
+end selectedRegistryTabSearchRectangle
+
+(** Return the search rectangle enclosing the Alert Banner. This can be used to validate the content inside the Alert Banner section, when Forecast is not available.
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".alertBannerSearchRectangle()
+**)
+function alertBannerSearchRectangle
+	return (imageRectangle(image:"Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/IconBanner_Alert", waitFor:30) + (-7,-15, 1765,25))
+end alertBannerSearchRectangle
+
+(** Return the search rectangle enclosing the Registry Forecast Section labels. This can be used to check the number of records face up (inside the parenthesis next to the label) and if the section is expanded or collapsed.
+@param labelImageName - the image of the section label from the Registry Forecast section
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Common/Helpers".registrySectionLabelSearchRectangle(labelImageName)
+**)
+function registrySectionLabelSearchRectangle labelImageName
+	return (imageRectangle(image:labelImageName, waitFor:10) + (-25,-6, 150, 6))
+end registrySectionLabelSearchRectangle

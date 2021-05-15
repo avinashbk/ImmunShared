@@ -1,0 +1,23 @@
+﻿(**sidePanelRectangle Function Returns search rectangle of the side panel for reconciliation
+@Handler 
+     set SidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle**)
+Function sidePanelRectangle 
+	WaitFor 10, image:"Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button"
+	set rectangle to imageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header") + (-80, 60, 1720,650)
+	if imageFound (image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button", searchRectangle: rectangle)
+		return (ImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button")+(-375,75,0,700))
+	end if
+End sidePanelRectangle
+
+(**SidePanelTopHeaderRectangle Function Returns search rectangle of the Header of the side panel for reconciliation
+@Handler 
+     set sidePanelHeaderRectangle to "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Helpers".sidePanelHeaderRectangle**)
+Function sidePanelHeaderRectangle
+	WaitFor 10, image:"Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button"
+	set rectangle to imageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header") + (-80, 60, 1720,650)
+	if imageFound (image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button", searchRectangle: rectangle)
+		return (ImageRectangle(image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button",  searchRectangle: rectangle)+(-375,-10,0,80))
+	end if
+End sidePanelHeaderRectangle
+
+

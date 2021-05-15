@@ -1,0 +1,3 @@
+ {
+	"patientGenerator":<<patient-encounter-generator\target\appassembler\bin\patient-encounter-generator.bat -u <username> -p <password> -d <domain>.northamerica.cerner.net>>
+}

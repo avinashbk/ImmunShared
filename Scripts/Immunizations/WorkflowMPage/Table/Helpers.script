@@ -1,0 +1,33 @@
+﻿(** Return the search rectangle of a cell given the row and column search rectangles
+@Param rowSearchRectangle - The row search rectangle which contains the table cell
+@Param columnSearchRectangle - The column search rectangle which contains the table cell
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/WorkflowMPage/Table/Helpers".cellIntersection(rowSearchRectangle, columnSearchRectangle)
+**)
+function cellIntersection rowSearchRectangle, columnSearchRectangle
+	return ((columnSearchRectangle.x, rowSearchRectangle.y), ((item 2 of columnSearchRectangle).x, (item 2 of rowSearchRectangle).y))
+end cellIntersection
+
+function columnSearchRectangle header
+	set topLeft to imageRectangle(text: header, validWords: header, SearchRectangle:(imageLocation(image:"Immunizations/WorkflowMPage/Search/TL_header",waitFor:300), imageLocation(image:"Immunizations/WorkflowMPage/Search/BR_header", waitFor:300))).topLeft +(-5,-12)   
+	set bottomRight to imageLocation(image: "Immunizations/WorkflowMPage/Search/Icon_headerSeperator", SearchRectangle: (topLeft, imageLocation("Immunizations/WorkflowMPage/Search/BR_header"))) + (0,500)
+	return (topLeft, bottomRight)
+end columnSearchRectangle
+
+function rowSearchRectangle header, text
+	set textRectangle to imageRectangle(text: text, SearchRectangle:columnSearchRectangle(header))
+	set topLeft to (textRectangle.topLeft + (-5,-5))
+	set bottomRight to (imageLocation("Immunizations/WorkflowMPage/Search/BR_header").x, textRectangle.bottomRight.y+4)
+	return(topLeft, bottomRight)
+end rowSearchRectangle
+
+(** Return the search rectangle that contains the RegistryImport and ConsentToShare button that are displayed at the bottom on the right-hand side
+@Return the coordinates of a search rectangle
+@Handler
+      "Immunizations/WorkflowMPage/Table/Helpers".registryAndConsentButtonSearchRectangle
+**) 
+function registryAndConsentButtonSearchRectangle 
+	set  TL_TableFooterRight to imagelocation("Immunizations/WorkflowMPage/Table/TL_PlusSignDropDown")+(-150,480)  
+	return(TL_TableFooterRight,TL_TableFooterRight+(525,90)) 
+end registryAndConsentButtonSearchRectangle

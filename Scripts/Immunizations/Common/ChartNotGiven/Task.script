@@ -1,0 +1,63 @@
+﻿(**TaskScript for the ChartNotGiven Functionality**)
+(**
+@param VaccineName the vaccine group to be selected
+@param NotGivenType to be selected
+@param NotGivenReason to be selected
+@param action type to be selected
+@param button to be selected 
+@Handler run "Immunizations/Common/ChartNotGiven/Task".chartRequiredInput vaccineName, notGivenType, action, notGivenReason, button**) 
+On chartRequiredInput vaccineName, notGivenType, action, notGivenReason, button
+	run "Immunizations/Common/ChartNotGiven/Actions".OpenDialog
+	run "Immunizations/Common/SelectImmunizationsList".SelectVaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".ClickSelectButton 
+	run "Immunizations/Common/ChartNotGiven/Actions".RequiredInput notGivenType, action, notGivenReason
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton button
+End chartRequiredInput
+
+(**TaskScript for the ChartNotGiven Functionality**)
+(**
+@param VaccineName the vaccine group to be selected
+@param NotGivenType to be selected
+@param NotGivenReason to be selected
+@param comment to be entered
+@Handler run "Immunizations/Common/ChartNotGiven/Task".chartRequiredInputWithComment  vaccineName, notGivenType, action, notGivenReason, comment, button **) 
+On chartRequiredInputWithComment vaccineName, notGivenType, action, notGivenReason, comment, button
+	run "Immunizations/Common/ChartNotGiven/Actions".OpenDialog
+	run "Immunizations/Common/SelectImmunizationsList".SelectVaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".ClickSelectButton 
+	run "Immunizations/Common/ChartNotGiven/Actions".RequiredInput notGivenType, action, notGivenReason
+	run "Immunizations/Common/ChartNotGiven/Actions".commentInput comment
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton button
+End chartRequiredInputWithComment
+
+(**TaskScript for the ChartNotGiven Functionality**)
+(**
+@param VaccineName the vaccine group to be selected
+@param NotGivenType to be selected
+@param NotGivenReason to be selected
+@param RescheduleDate to select the reschedule date
+@Handler run "Immunizations/Common/ChartNotGiven/Task".chartWithRescheduleDate vaccineName, notGivenType, action, notGivenReason, rescheduleDate, button **) 
+On chartWithRescheduleDate vaccineName, notGivenType, action, notGivenReason, rescheduleDate, button
+	run "Immunizations/Common/ChartNotGiven/Actions".OpenDialog
+	run "Immunizations/Common/SelectImmunizationsList".SelectVaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".ClickSelectButton 
+	run "Immunizations/Common/ChartNotGiven/Actions".RequiredInput notGivenType, action, notGivenReason 
+	run "Immunizations/Common/ChartNotGiven/Actions".RescheduleDateInput rescheduleDate 
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".ClickButton button
+End chartWithRescheduleDate
+
+(**TaskScript for the ChartNotGiven Functionality**)
+(**
+@param VaccineName the vaccine group to be selected
+@param NotGivenType to be selected
+@param NotGivenReason to be selected
+@param AuthorizedDate to select the authorized date
+@Handler run "Immunizations/Common/ChartNotGiven/Task".chartWithAuthorizedDate vaccineName, notGivenType, action, notGivenReason, authorizedDate, button**) 
+On chartWithAuthorizedDate vaccineName, notGivenType, action, notGivenReason, authorizedDate, button
+	run "Immunizations/Common/ChartNotGiven/Actions".OpenDialog
+	run "Immunizations/Common/SelectImmunizationsList".SelectVaccineName vaccineName
+	run "Immunizations/Common/SelectImmunizationsList".ClickSelectButton 
+	run "Immunizations/Common/ChartNotGiven/Actions".RequiredInput notGivenType, action, notGivenReason 
+	run "Immunizations/Common/ChartNotGiven/Actions".AuthorizedDateInput authorizedDate 
+	run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".ClickButton button
+End chartWithAuthorizedDate

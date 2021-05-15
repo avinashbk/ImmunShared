@@ -1,0 +1,131 @@
+﻿(**Checks to ensure the vaccineName group displays in the vaccineName column.
+@Param vaccineName the vaccineName group that should display in the vaccineName column
+@Handler run "Immunizations/WorkflowMPage/Table/Validations".VerifyVaccineNameColumn vaccineName**)
+On verifyVaccineNameColumn vaccineName
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Vaccine")
+	run "Immunizations/Util/Validation".verifyText vaccineName, ColumnSearchRectangle
+End verifyVaccineNameColumn
+
+(**Verifies Administration column count and did not count icon (visible and not visible)
+@Param vaccineName - The vaccineName group that should display in the vaccineName column
+@Param adminCount - The count of administrations charted for the vaccineName group
+@Param didNotCountIconPresent - Expecting true or false value for whether the did not count icon is displayed (e.g. "true" for when it's displayed)
+@Handler 
+             run "Immunizations/WorkflowMPage/Table/Validations".verifyAdministrationColumn vaccineName, adminCount, didNotCountIconPresent**)
+on verifyAdministrationColumn vaccineName, adminCount, didNotCountIconPresent
+	if didNotCountIconPresent is empty
+		logWarning "Please set variable didNotCountIconPresent and ensure you are passing it into the handler."
+	end if
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".rowSearchRectangle("Vaccine",vaccineName)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Administrations")
+	If AdminCount is in ("0", "Immunizations/Common/DoubleDash", "", "--", "- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else if adminCount is "Did Not Count"  //Once backlog has been completed this condition can be removed and tests should be updated to using didNotCountIconPresent variable with a true or false value passed in for the icon validation.
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DidNotCount","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else
+		run "Immunizations/Util/Validation".verifyText adminCount,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle) 
+		run "Immunizations/WorkflowMPage/Table/Validations".verifyDidNotCountIcon didNotCountIconPresent, rowSearchRectangle, columnSearchRectangle
+	end if
+end verifyAdministrationColumn
+
+(**Used in verification handler for Administrations column, currently is not displayed in other columns so should NOT be utilized on its own for the time being.  Please use verification handler for Administrations column instead.
+@Param didNotCountIconPresent - Expecting true or false value for whether the did not count icon is displayed (e.g. "true" for when it's displayed)
+@Param rowSearchRectangle - The search rectangle used to ensure the value is being retrieved for the correct column and row
+@Param columnSearchRectangle - Used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler 
+              run "Immunizations/WorkflowMPage/Table/Validations".verifyDidNotCountIcon didNotCountIconPresent, rowSearchRectangle, columnSearchRectangle**)
+on verifyDidNotCountIcon didNotCountIconPresent, rowSearchRectangle, columnSearchRectangle
+	if didNotCountIconPresent is true
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DidNotCount","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	else if didNotCountIconPresent is false
+		run "Immunizations/Util/Validation".verifyImageNotVisible "Immunizations/Common/DidNotCount","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(rowSearchRectangle, columnSearchRectangle)
+	end if
+end verifyDidNotCountIcon
+
+(**Retrieves value from the Last Action column and returns either a success or failure depending on whether the expected value is observed.
+@Param LastAction the last charted action for the vaccineName that should display in the Last Action column (will display double dash for null)
+@Param Rectangle the search rectangle used to ensure the value is being retrieved for the correct column and row
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/Table/Validations".VerifyLastActionColumn vaccineName,lastAction**)
+
+On VerifyLastActionColumn vaccineName,lastAction
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".rowSearchRectangle("Vaccine",vaccineName)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Last Action")
+	If LastAction is "Administered - Did Not Count"
+		run "Immunizations/Util/Validation".verifyText lastAction,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	Else If LastAction is "Administered"
+		run "Immunizations/Util/Validation".verifyText lastAction,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+		run "Immunizations/Util/Validation".VerifyTextNotVisible "Did Not Count","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	Else If LastAction is in ("0","Immunizations/Common/DoubleDash","","--","- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else
+		run "Immunizations/Util/Validation".verifyText lastAction,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	End if
+End VerifyLastActionColumn
+
+(**Retrieves value from the Last Action Date column and returns either a success or failure depending on whether the expected value is observed.
+@Param LastActionDate the date of the last charted action for the vaccineName that should display in the Last Action column (will display double dash for null)
+@Param Rectangle the search rectangle used to ensure the value is being retrieved for the correct column and row
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/Table/Validations".VerifyLastActionDateColumn vaccineName,LastActionDate, Age**)
+On verifyLastActionDateColumn vaccineName,LastActionDate, Age
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".rowSearchRectangle("Vaccine",vaccineName)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Last Action Date")
+	If LastActionDate is in ("0","Immunizations/Common/DoubleDash","","--","- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else 
+		Set LastActionDate to the abbreviated monthName of LastActionDate && formattedTime("%d,", LastActionDate) && year of LastActionDate
+		run "Immunizations/Util/Validation".verifyText uppercase(LastActionDate) &&"("&Age&")", "Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	End If
+End VerifyLastActionDateColumn
+
+(**Retrieves value from the Status column and returns either a success or failure depending on whether the expected value is observed.
+@Param Rectangle the search rectangle used to ensure the value is being retrieved for the correct column and row
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/Table/Validations".verifyStatusColumn  vaccineName, status**)
+On verifyStatusColumn vaccineName, status
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".rowSearchRectangle("Vaccine",vaccineName)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Status")
+	If Status is in ("0","Immunizations/Common/DoubleDash","","--","- -")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else if status is "Overdue"
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/WorkflowMPage/Table/Overdue","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else 
+		run "Immunizations/Util/Validation".verifyText status,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	End if
+End verifyStatusColumn
+
+(**Retrieves value from the NextRecommended column and returns either a success or failure depending on whether the expected value is observed.
+@Param Rectangle the search rectangle used to ensure the value is being retrieved for the correct column and row
+@Param Validation used as a placeholder for the value that was retrieved and will be checked to see whether it was found to return either a success or failure
+@Handler run "Immunizations/WorkflowMPage/Table/Validations".VerifyNextRecommendedColumn vaccineName, nextRecommendedDate**)
+On verifyNextRecommendedColumn vaccineName, nextRecommendedDate
+	set rowSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".rowSearchRectangle("Vaccine",vaccineName)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Next Recommended")
+	if  NextRecommendedDate is in ("0","Immunizations/Common/DoubleDash","", "- -", "--")
+		run "Immunizations/Util/Validation".verifyImage "Immunizations/Common/DoubleDash","Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else if NextRecommendedDate contains "Today"
+		run "Immunizations/Util/Validation".verifyText nextRecommendedDate,"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle)
+	Else
+		run "Immunizations/Util/Validation".verifyText uppercase(nextRecommendedDate),"Immunizations/WorkflowMPage/Table/Helpers".cellintersection(RowSearchRectangle, ColumnSearchRectangle) 
+	end if
+End VerifyNextRecommendedColumn
+
+(**Verification to ensure the vaccine group is displayed in history section.
+@Param vaccineName - vaccine group to search for
+@Handler 
+          run "Immunizations/WorkflowMPage/Table/Validations".verifyVaccineNameHistorySection vaccineName**)
+On verifyVaccineNameHistorySection vaccineName
+	Set rectangle to (imageLocation(image:"Immunizations/WorkflowMPage/Search/TL_History", waitfor:30),imageLocation(image:"Immunizations/WorkflowMPage/Search/BR_History", waitfor:30))
+	run "Immunizations/Util/Validation".verifyText vaccineName, rectangle
+End verifyVaccineNameHistorySection
+
+(**Verification to ensure the vaccine group is displayed above history section.
+@Param vaccineName - vaccine group to search for
+@Handler 
+          run "Immunizations/WorkflowMPage/Table/Validations".verifyVaccineNameAboveHistorySection vaccineName**)
+On verifyVaccineNameAboveHistorySection vaccineName
+	waitFor 10, "Immunizations/WorkflowMPage/Search/TL_History"
+	Set rectangle to imageRectangle("Immunizations/WorkflowMPage/Search/TL_History")+(0, -500, 225, 0)
+	run "Immunizations/Util/Validation".verifyText vaccineName, rectangle
+End verifyVaccineNameAboveHistorySection

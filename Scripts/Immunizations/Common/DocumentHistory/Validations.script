@@ -1,0 +1,34 @@
+﻿(** Verify a Product exists in the History Entry
+@Param Text - The product/Orderable that you want check if it is found in the product window
+@Handler
+ run "Immunizations/Common/DocumentHistory/Validations".verifyProductInHistoryEntry text**) 
+on verifyProductInHistoryEntry text
+	Set rectangle to  "Immunizations/Common/DocumentHistory/Helpers".productSearchRectangle
+	Click imageLocation(Text:"Product", searchrectangle:(rectangle))+(0,20)
+	MoveTo imageLocation(Text:"Source", searchrectangle:(rectangle))
+	run "Immunizations/Util/Validation".verifyText text, rectangle
+end verifyProductInHistoryEntry
+
+
+(** Verify the input values in the History Entry dialog
+Note: The details section has to be expanded before running this handler 
+@Param Field is the field label whose value has to be verified
+@Param Value is the content to verify
+@Handler
+ run "Immunizations/Common/DocumentHistory/Validations".VerifyInputValueInHistoricalEntry**) 
+On VerifyInputValueInHistoricalEntry Field, Value, rectangle
+	Set Found to False
+	Repeat until Found is True
+		ScrollWheelDown 1
+		Put ImageFound(0,Text:Field,SearchRectangle:Rectangle) into Found
+		If Found is True
+			Put Readtext(item 1 of everyimageLocation(Text:Field,SearchRectangle:Rectangle) +(0,40),EnableAggressiveTextExtraction:"True",DPI:90) into Output
+			run "Immunizations/Util/Validation".verifyValue output,value
+		End If
+		
+		If the repeatIndex > 10
+			LogError "Input field not found"
+			Exit Repeat
+		End If
+	End Repeat
+End VerifyInputValueInHistoricalEntry

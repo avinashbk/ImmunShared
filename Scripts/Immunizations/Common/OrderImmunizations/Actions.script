@@ -1,0 +1,53 @@
+﻿(**Interaction script for the ChartNotGivenDialog functionality
+Opens Order Immunizations dialog from either the MPage 
+@Handler
+run "Immunizations/Common/OrderImmunizations/Actions".OpenDialog
+**)
+On OpenDialog
+	click imageLocation(image: "Immunizations/WorkflowMPage/Table/Button")
+	click text:"Order Immunizations",searchRectangle:("Immunizations/WorkflowMPage/Table/TL_PlusSignDropDown", "Immunizations/WorkflowMPage/Table/BR_PlusSignDropDown")
+End OpenDialog
+
+(** Select orderable from the order vaccine list
+@param orderType
+@param orderableName - Name of the product to be ordered
+@handler
+run "Immunizations/Common/OrderImmunizations/Actions".selectOrderableFromList orderableName, encounterType
+**)
+On selectOrderableFromList orderableName, encounterType
+	set rectangle to "Immunizations/Common/OrderImmunizations/Helpers".DialogSearchRectangle
+	if EncounterType = "Inpatient"
+		click text: "Inpatient", SearchRectangle: rectangle
+	else if EncounterType = "Outpatient"
+		click text: "Ambulatory - In Office (Meds in Office)",validCharacters:"*", SearchRectangle: rectangle + (0,0,0,-300)
+	end if
+	set rectangle to "Immunizations/Common/OrderImmunizations/Helpers".DialogSearchRectangle + (0,140,0,0)
+	repeat until ImageFound(text:orderableName, SearchRectangle: rectangle)
+		ScrollWheelDown 6
+		if not imageFound(text:orderableName, searchRectangle: rectangle) and ImageFound("Immunizations/Common/DocumentHistory/scrolledTooFarDown")
+			logError "Could not find" && orderableName && "in product list."
+			exit repeat
+		end if
+	end repeat
+	click foundimagelocation()
+	WaitFor 100, "Immunizations/Common/OrderImmunizations/OrderImmunizationsBlue"
+	wait 5
+	click image:"Immunizations/Common/ChartingDialog/CloseButton", SearchRectangle: rectangle
+End selectOrderableFromList
+
+(** Sign orderable from the Mpage
+@param orderableName - Name of the product to be ordered
+@handler
+run "Immunizations/Common/OrderImmunizations/Actions".signOrderable orderableName
+**)
+On signOrderable orderableName
+	waitfor 100,"Immunizations/Common/OrderImmunizations/SignOrderable"
+	click imagelocation("Immunizations/Common/OrderImmunizations/SignOrderable")
+	waitFor 100, "Immunizations/Common/OrderImmunizations/OrdersForSignature"
+	set rectangle to "Immunizations/Common/OrderImmunizations/Helpers".orderSignatureSearchRectangle
+	if imagefound(text: orderableName, enableAggressiveTextExtraction:"True", SearchRectangle: rectangle)
+		click image:"Immunizations/Common/OrderImmunizations/SignButton", searchrectangle: rectangle
+	else
+		logerror "Could Not Find" && orderableName && "in" && rectangle
+	end if
+End signOrderable

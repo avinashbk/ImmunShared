@@ -1,0 +1,215 @@
+﻿(** Navigate to the Immunization workflow given a patient name and the name of the workflow via the TOC
+@Param patientName - The name of the patient to open the chart
+@Param Component - The Immunization Workflow name
+@Handler
+     "Immunizations/Setup".NavigateToImmunizationWorkflowViaTOC patientName, Component
+**)
+
+on NavigateToImmunizationWorkflowViaTOC patientName, Component
+	wait 10
+	waitfor 10, "Immunizations/Setup/Icon_Search"
+	click Foundimagelocation()
+	wait 1
+	typeText patientName, returnKey
+	if( imageFound(5, "Immunizations/Setup/Icon_OKButton"))
+		click FoundimageLocation()
+	end if
+	if( imageFound(70, "Immunizations/Setup/Text_AssignARelationship"))
+		click FoundimageLocation()
+		click "Immunizations/Setup/Button_AssignARelationshipOK"
+	end if
+	wait 5
+	set ScrollBarDownArrow to imageLocation("Immunizations/Setup/Icon_ScrollBarDownArrow"), "Immunizations/Forecaster-Forecast/Search/BR_Today/OrangeToGrey_SOLM642016_6.9", "Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarLeftArrow/SOLM64_EOD_Grey_2016"
+	set Rectangle to (imageLocation("Immunizations/Setup/TL_LeftMenu"), FoundimageLocation() + (200, 900))
+	repeat until imageFound(text:Component, ignoreSpaces:yes, SearchRectangle:Rectangle)
+		if( imageFound("Immunizations/Setup/Icon_ScrolledToFarDown"))
+			logError "Could not find Component:" && Component
+			exit repeat
+		end if
+		Repeat 10 times
+			click ScrollBarDownArrow
+		End repeat
+	end repeat
+	click FoundimageLocation()
+	if not imageFound(image:"Immunizations/WorkflowMPage/Table/TL_Workflow", waitFor: 300)
+		run "Immunizations/Common/Actions".temporaryRefreshClick
+	end if
+	WaitFor 300, "Immunizations/WorkflowMPage/Table/TL_Workflow"
+end NavigateToImmunizationWorkflowViaTOC
+
+(** Navigate to the Immunization workflow given a patient name and the name of the workflow via the TOC
+@Param patientName - The name of the patient to open the chart
+@Param Component - The Immunization workflow name
+@Param relationship - The assigned relationship between the user and patient
+@Handler
+     "Immunizations/Setup".NavigateToImmunizationWorkflowViaMenu patientName, Menu, SubMenu, relationship
+**)
+
+on NavigateToImmunizationWorkflowViaMenu patientName, Menu, SubMenu, relationship
+	wait 10
+	waitfor 20, "Immunizations/Setup/Icon_Search"
+	click Foundimagelocation()
+	wait 1
+	typeText patientName, returnKey
+	if( imageFound(5, "Immunizations/Setup/Icon_OKButton"))
+		click FoundimageLocation()
+	end if
+	if(imageFound(30,"Immunizations/Setup/Text_AssignARelationship"))
+		click FoundimageLocation()
+		typetext relationship
+		click "Immunizations/Setup/Button_AssignARelationshipOK"
+	end if 
+	wait 10
+	typeText windowsKey & upArrow
+	run "Immunizations/Setup".LoadComponentViaPatientChart menu, subMenu
+	typeText windowsKey & upArrow
+	repeat until not imageFound((image: "Immunizations/Setup/PowerChart_Organizer"))
+		click image: ( "Immunizations/Setup/X_Button")
+		wait 3
+	end repeat
+	typeText windowsKey & upArrow
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"
+	if ImageFound("Immunizations/Setup/Window_Icon")
+		click FoundImageLocation()
+	end if
+	WaitFor 300, "Immunizations/WorkflowMPage/Table/TL_Workflow"
+end NavigateToImmunizationWorkflowViaMenu 
+
+(** 
+This handler requires an additional helper suite:
+#https://github.cerner.com/EggPlant/IPDev-Millennium-Shared-PowerchartFramework
+
+Change User and assign a relationship in Powerchart
+@Param username - The username to sign into millennium
+@Param password - The password used to sign into millennium
+@Param relationship - The assigned relationship between the user and patient
+@Handler
+     "Immunizations/Setup".changeUser username, password, relationship
+**)
+
+on changeUser username, password, relationship
+	click text:"Task", searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")
+	click imagelocation("Common/ChangeUser_Login")
+	Run "C:/EggplantSuites/IPDev-Millennium-Shared-PowerchartFramework/IPDev-Millennium-Shared-PowerchartFramework.suite/Scripts/Common".LoginChangeUser username, password
+	if relationship is not empty
+		if (imageFound(15,"Immunizations/Setup/Text_AssignARelationship"))
+			click foundimageLocation()
+			typetext relationship
+			click "Immunizations/Setup/Button_AssignARelationshipOK"
+		end if
+	end if 
+end changeUser
+
+(** Handle any popups that occur after selecting the component
+@Param password - The password used to sign into millennium
+@Handler
+     "Immunizations/Setup".HandleErrorDialogue Password
+**)
+on HandleErrorDialogue Password
+	If imageFound("Immunizations/Setup/Text_Password")
+		click FoundimageLocation()
+		typeText password, returnKey
+		wait 5
+	End If
+	If imageFound("Immunizations/Setup/Icon_ErrorClose")
+		click FoundimageLocation()
+	End If
+	If imageFound("Immunizations/Setup/Icon_ErrorClose2")
+		click FoundimageLocation()
+	End If
+end HandleErrorDialogue
+
+(** Navigate to the Immunization workflow given a patient name and the name of the workflow via the TOC and handle any popups that occur after selecting the component.
+@Param username - The username to sign into millennium
+@Param password - The password used to sign into millennium
+@Param domain - The domain testing is occurring in
+@Param patientName - The name of the patient to open the chart
+@Param component - The Immunization Workflow name
+@Handler
+     "Immunizations/Setup".LoginAndLoadComponentViaTOC username, password, domain, patientName, component
+**)
+
+On LoginAndLoadComponentViaTOC username, password, domain, patientName, component
+	typeText windowsKey &"r"
+	wait 1 
+	typeText"Powerchart.exe", returnKey
+	run "Millennium_Login_window".LogIntoMillenniumApps username, password, domain 
+	run "Immunizations/Setup".NavigateToImmunizationWorkflowViaTOC patientName, component
+	run "Immunizations/Setup".HandleErrorDialogue password
+End LoginAndLoadComponentViaTOC
+
+(** Navigate to the Immunization workflow given a patient name and the name of the workflow via the menu bar and handle any popups that occur after selecting the component.
+@Param Username - The username to sign into millennium
+@Param Password - The password used to sign into millennium
+@Param Domain - The domain testing is occurring in
+@Param patientName - The name of the patient to open the chart
+@Param Component - The Immunization Workflow name
+@Handler
+     "Immunizations/Setup".LoginAndLoadComponentViaMenu Username, Password, Domain, patientName, Menu, SubMenu,relationship
+**)
+
+On LoginAndLoadComponentViaMenu Username, Password, Domain, patientName, Menu, SubMenu, relationship
+	if "S18VX" is in Domain //This is to mitigate server 2058 not being started in the s18vx master domain, causing issues for our tests in the CI loop. Once it is started at the master level, this entire 'If' block can be removed
+		Run "C:/EggPlantSuites/IPDev-Millennium-Shared-HealthMaintenanceTools/IPDev-Millennium-Shared-HealthMaintenanceTools.suite/Scripts/SCPViewUtilities".startServer Username, Domain, Password, "IPS18VX01", 2058, "frontend"
+	end if
+	typeText windowsKey &"r"
+	wait 1 
+	typeText"Powerchart.exe", returnKey
+	run "Millennium_Login_window".LogIntoMillenniumApps Username, Password, Domain 
+	run "Immunizations/Setup".NavigateToImmunizationWorkflowViaMenu patientName, Menu, SubMenu, relationship
+	run "Immunizations/Setup".HandleErrorDialogue Password
+End LoginAndLoadComponentViaMenu
+
+(** Navigate to the Immunization workflow while a patient's chart is already open
+@Param menu - The Menu used to get to component (i.e. 'Chart')
+@Param subMenu - Name of the component (i.e. HMAUTOMATIONFORECASTON)
+@Handler
+     "Immunizations/Setup".LoadComponentViaPatientChart menu, subMenu
+**)
+On LoadComponentViaPatientChart menu, subMenu
+	if (ImageFound(text:Menu, searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")))
+		log "Wait for another 5 seconds"
+		wait 5
+		Click Text:Menu, searchRectangle:("Immunizations/Setup/TL_MenuBar", "Immunizations/Setup/BR_MenuBar")
+	end if	
+	repeat until imageFound(text:subMenu, waitfor:10, ignoreSpaces:true,searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(-5,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000)))
+		click image:"Immunizations/Setup/Menu_ScrollDownArrow", searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(-5,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000))
+		wait 5
+		MoveTo imageLocation(image:"Immunizations/Setup/BR_MenuBar")+(20,20)
+		log "Could not find component in menu"	
+	end repeat
+	click text:subMenu, waitfor:10, ignoreSpaces:true,searchRectangle:(imageLocation("Immunizations/Setup/TL_MenuBar")+(-5,10),imageLocation ("Immunizations/Setup/BR_MenuBar")+(100,1000))
+End LoadComponentViaPatientChart
+
+(** Close application via task menu option.
+@Param Cleanup - Used to determine whether application should remain open or close (useful for when there are domain issues that could lead to inability of loading the component).
+@Handler
+     run "Immunizations/Setup".CloseApplication
+**)
+On CloseApplication
+	typeText AltKey,F4
+	Wait 1
+	typeText AltKey,F4
+End CloseApplication
+
+(** Close chart via x button
+@Handler
+     "Immunizations/Setup".closeChartViaX
+**)
+On closeChartViaX
+	Click imageLocation(Text:"X", SearchRectangle:("Immunizations/Setup/TL_WindowButtons", "Immunizations/Setup/BR_WindowButtons"))
+End closeChartViaX
+
+(** Navigate to the Immunization workflow for given a patient name with a specific encounter
+@Param patientName - The name of the patient to open the chart
+@Param finNumber - The encounter of the patient to open the chart
+@Handler
+     "Immunizations/Setup".LoadPatientWithEncounterAndLoadComponent patientName, finNumber, menu, subMenu, relationship
+**)
+On LoadPatientWithEncounterAndLoadComponent patientName, finNumber, menu, subMenu, relationship
+	Run "Millennium_LoadPatient_RecentSearch".LoadPatient patientName
+	Run "Millennium_PatientSearch_Window".EncounterSearch finNumber
+	Click "Immunizations/Setup/Icon_OKButton"
+	Run "Millennium_AssignRelationship_Window".AssignRelationship relationship
+	Run "Millennium_SelectMenu_SubMenu".SelectMenuSubMenu "Patient",menu,subMenu
+End LoadPatientWithEncounterAndLoadComponent

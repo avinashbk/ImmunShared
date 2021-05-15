@@ -1,0 +1,202 @@
+﻿(**Click on save button on the side panel to save the changes
+@param sidePanelRectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickSave**)
+On ClickSave 
+	Set SidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle 
+	Click imageLocation(Text:"Save",searchRectangle:SidePanelRectangle)
+	
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"	
+End ClickSave
+
+(**Click on cancel button on the side panel to cancel the changes
+@param SidePanelRectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickCancel**)
+On ClickCancel 
+	Set SidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle 
+	Click imageLocation(Text:"Cancel",searchRectangle:SidePanelRectangle) 
+End ClickCancel
+
+(**Clicking on Unchart button
+@param authorizedDate when charted the event with that date
+@param index used for uncharting the events according to the index selected
+@param unchartReason for entering the reason for uncharting the event
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".clickUnchart authorizedDate,index,unchartReason**)
+On clickUnchart authorizedDate,index,unchartReason
+	Set sidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle
+	Set newDate to the abbreviated monthName of authorizedDate && formattedTime("%d,",authorizedDate) && year of authorizedDate
+	log newDate
+	Click imageLocation(Text:"Unchart",searchRectangle:sidePanelRectangle, waitFor:30)
+	if imageFound(image: "Immunizations/WorkflowMPage/SidePanel/Button_Multiple_Unchart_Events",searchRectangle:sidePanelRectangle, waitFor:3)
+		Set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle+((10,-10),(-150,-100))
+		Click item index of EveryimageLocation(Text:newDate,searchRectangle:rectangle, dpi:100,  enableAggressiveTextExtraction:"True", ignoreSpaces:true)
+	end if 
+	Click imageLocation(Text:"Reason for Uncharting",searchRectangle:sidePanelRectangle)+(0,30)
+	TypeText unchartReason
+End clickUnchart
+
+(**Clicking on Modify button
+@param adminDate the administration date input when charting
+@param index used for modifying the events according to the index selected
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".clickModify adminDate,index**)
+on clickModify adminDate,index
+	Set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle 
+	Set newDate to uppercase(the abbreviated monthName of adminDate && formattedTime("%d,",adminDate) && year of adminDate)
+	log newDate
+	Click imageLocation(Text:"Modify",searchRectangle:rectangle, waitFor:30)
+	if ImageFound(image: "Immunizations/WorkflowMPage/SidePanel/Button_ModifyMultiple",searchRectangle:rectangle, waitFor:3)
+		Set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle+((30,-10),(-150,-100))
+		Click item index of EveryimageLocation(Text:newDate,searchRectangle:rectangle, validPattern:"Immunizations/Util/Date".setPattern(newDate), dpi:100, waitFor:3, enableAggressiveTextExtraction:"True", ignoreSpaces:true)
+	end if
+end clickModify
+
+(**Modifying the administration date
+@param adminDate the modified administration date to type when modifying
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".modifyAdminDate dateFormat,modifiedAdminDate**)
+on modifyAdminDate dateFormat,modifiedAdminDate
+	Set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle
+	Click imageLocation(Text:"Administration Date",waitfor:30, searchrectangle:(rectangle))+(0,20)
+	Typetext dateFormat,returnKey
+	wait 2
+	If DateFormat is "Date"
+		typeText tabKey
+		TypeText controlKey & "a"
+		typeText formattedTime("%m", modifiedAdminDate)
+		TypeText tabKey
+		TypeText controlKey & "a"
+		TypeText formattedTime("%d", modifiedAdminDate)
+		TypeText tabKey
+		TypeText controlKey & "a"
+		typetext year of modifiedAdminDate
+	Else If DateFormat is "Week Of"
+		typeText tabKey
+		TypeText controlKey & "a"
+		typeText formattedTime("%m", modifiedAdminDate)
+		TypeText tabKey
+		TypeText controlKey & "a"
+		TypeText formattedTime("%d", modifiedAdminDate)
+		TypeText tabKey
+		TypeText controlKey & "a"
+		typetext year of modifiedAdminDate
+		//Select the week of precision again because changing the date will reset the date format to "Date"
+		Click imageLocation(Text:"Administration Date",waitfor:30, searchrectangle:(rectangle))+(0,20)
+		Typetext "Date",returnKey
+		Click imageLocation(text:"Administration Date", searchrectangle:rectangle)
+		Click imageLocation(Text:"Administration Date",waitfor:30, searchrectangle:(rectangle))+(0,20)
+		Typetext "Week of",returnKey
+		Click imageLocation(text:"Administration Date", searchrectangle:rectangle)	
+	Else If DateFormat is "Month/Year"
+		Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(40,20) 
+		MoveTo imageLocation(Text:"Product", searchrectangle:(rectangle))
+		Click  imageLocation(Text: formattedTime("%b", modifiedAdminDate), searchrectangle:(rectangle))
+		TypeText tabKey
+		typetext year of modifiedAdminDate
+	Else If DateFormat is "Year"	
+		TypeText tabKey
+		typetext year of modifiedAdminDate	
+	End If
+	Click imageLocation(text:"Administration Date", searchrectangle:rectangle)
+end modifyAdminDate
+
+(**Save or Cancel the modification changes
+@param text the "Save" or "Cancel" button text to click after making the changes in modify workflow
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".saveOrCancelModification text**)
+on saveOrCancelModification text, rectangle
+	if rectangle is empty
+		set rectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle 
+	end if
+	Click imageLocation(Text:text, searchrectangle:(rectangle))
+end saveOrCancelModification
+
+(**Click on details in the side panel to open the details section
+@param SidePanelRectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/WorkflowMPage/SidePanel/Actions".ClickDetails**)
+On ClickDetails
+	Set SidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelRectangle 
+	Click item 2 of EveryImageLocation(Text:"Details",searchRectangle:SidePanelRectangle) 
+End ClickDetails
+
+(**Modifies the field values in the Side Panel
+@Param Field is the field name whose value has to be entered
+@Param Value is the data to be entered
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".ModifySidePanelFields**)
+On ModifySidePanelFields Field,Value
+	Set Rectangle to (imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"), imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window") + (400,800))
+	DoubleClick imageLocation(Text:Field, searchrectangle:(rectangle))+(0,30)
+	Typetext Value, returnKey
+End ModifySidePanelFields
+
+(**Close the side panel and waits to ensure it has been closed to ensure subsequent actions/validations do not fail due to domain slowness.
+@param rectangle - the area to search for the image in
+@Handler run "Immunizations/WorkFlowMPage/SidePanel/Actions".closeSidePanel rectangle, vaccineName**)
+on closeSidePanel rectangle, vaccineName
+	Set Rectangle to (imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"), imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window") + (410,800))
+	Click image:"Immunizations/WorkflowMPage/SidePanel/Button", searchrectangle:(rectangle)
+	set columnSearchRectangle to "Immunizations/WorkflowMPage/Table/Helpers".columnSearchRectangle("Vaccine")
+	WaitFor 60, text:vaccineName, searchrectangle:(columnSearchRectangle)
+end closeSidePanel
+
+(**This handler will loop through a list of dropdown and freetext fields that are currently visible to modify all at once
+@Param fieldList - List of fields to modify
+@Param sidePanelRectangle - Rectangle for the side panel body
+@Param fieldListValue - List of field values to modify to
+@Handler 
+     run "Immunizations/WorkflowMPage/SidePanel/Actions".modifyFieldWithRepeat fieldList, sidePanelRectangle, fieldListValue**)
+on modifyFieldWithRepeat fieldList, sidePanelRectangle, fieldListValue
+	put the number of items in fieldList into fieldListTotalCount
+	set itemCount to 0
+	repeat fieldListTotalCount times
+		add 1 to itemCount
+		click imageLocation(text:item itemCount of fieldList, searchRectangle:sidePanelRectangle)+(0,20)
+		if item itemCount of fieldList is in ("Comments", "Dose", "Lot Number")	
+			wait 1
+			typeText controlKey & "a"
+			typeText deleteKey
+		end if
+		typeText item itemCount of fieldListValue
+		typeText returnKey
+	end repeat
+	//Moving the cursor for better readability when validating in modify mode after entering value in the field.
+	moveTo (0,0)
+end modifyFieldWithRepeat
+
+(**This handler will modify date values (please note that if VIS date information is being modified you will need to select the VIS value prior to using this handler (can use handler modifyFieldWithRepeat to edit VIS value))
+@Param field - Field to click to get the focus in the side panel (not the field you are modifying)
+@Param sidePanelRectangle - Rectangle for the side panel body
+@Param tabCount - Number of times the tab key should be pressed to get to the date field that will be modified
+@Param fieldValue - Field value to modify to
+@Handler 
+     run "Immunizations/WorkflowMPage/SidePanel/Actions".modifyDateField field, sidePanelRectangle, tabCount, date**)
+on modifyDateField field, sidePanelRectangle, tabCount, date
+	click imageLocation(text:field, searchRectangle:sidePanelRectangle)
+	repeat tabCount
+		typeText tabKey
+	end repeat
+	TypeText controlKey & "a"
+	typeText formattedTime("%m", date)
+	TypeText tabKey
+	TypeText controlKey & "a"
+	TypeText formattedTime("%d", date)
+	TypeText tabKey
+	TypeText controlKey & "a"
+	typetext year of date
+	wait 1
+	typeText tabKey
+end modifyDateField
+
+(**Click the scroll down button one time in the side panel.
+@Handler
+     run "Immunizations/WorkFlowMPage/SidePanel/Actions".clickScrollDownArrow
+**)
+on clickScrollDownArrow
+	set sidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle
+	click imageLocation(Image:"Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarDownArrow",searchRectangle:sidePanelRectangle)
+end clickScrollDownArrow
+
+(**Click the scroll Up button one time in the side panel.
+@Handler
+     run "Immunizations/WorkFlowMPage/SidePanel/Actions".clickScrollUpArrow
+**)
+on clickScrollUpArrow
+	set sidePanelRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle
+	click imageLocation(Image:"Immunizations/Forecaster-Forecast/Search/Icon_ScrollBarArrowUp",searchRectangle:sidePanelRectangle), 
+end clickScrollUpArrow

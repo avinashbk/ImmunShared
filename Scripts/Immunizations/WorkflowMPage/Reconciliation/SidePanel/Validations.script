@@ -1,0 +1,33 @@
+﻿(**Uses field label with text and index to validate the field value for smaller sized fields
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text - The text value needing validateds
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Validations".fieldValidation index, label, sidePanelRectangle, text**)
+on fieldValidation index, label, sidePanelRectangle, text
+	set rectangle to imageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header") + (0, 30, 1750, 600)
+	click imageLocation(image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button" ,searchRectangle: rectangle) + (-50, 200)
+	repeat until imageFound(text:label, searchRectangle:sidePanelRectangle)
+		scrollWheelDown 4
+	end repeat
+	run "Immunizations/WorkflowMPage/SidePanel/Validations".verifySmallFieldValue  index, label, sidePanelRectangle, text
+end fieldValidation
+
+(**Uses field label with text and index to validate the field value for smaller sized fields
+@Param index the index of the field you are wanting to validate against (first charted event vs second or third, etc...)
+@Param label the field label you are wanting to validate
+@Param sidePanelRectangle - search rectangle for the entire side panel
+@Param text - The text value needing validateds
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Validations".largeFieldValidation index, label, sidePanelRectangle, text**)
+on largeFieldValidation index, label, sidePanelRectangle, text
+	set rectangle to imageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header") + (0, 30, 1750, 600)
+	click imageLocation(image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button" ,searchRectangle: rectangle) + (-50, 200)
+	repeat until imageFound(text:label, searchRectangle:sidePanelRectangle)
+		scrollWheelDown 4
+		if counter() = 3
+			logError "Could not find field"
+			exit repeat
+		end if 
+	end repeat
+	run "Immunizations/WorkflowMPage/SidePanel/Validations".verifyLargeFieldValue index, label, sidePanelRectangle, text
+end largeFieldValidation

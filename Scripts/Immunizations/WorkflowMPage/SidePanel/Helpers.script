@@ -1,0 +1,13 @@
+﻿(**sidePanelRectangle Function Returns search rectangle of the side panel
+@Handler run  "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelRectangle**)
+Function sidePanelRectangle 
+	WaitFor 120, image:"Immunizations/WorkflowMPage/SidePanel/TL_Window"
+	return (imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"), imageLocation("Immunizations/WorkflowMPage/SidePanel/BR_Window"))
+End sidePanelRectangle
+
+(**SidePanelTopHeaderRectangle Function Returns search rectangle of the Header of the side panel
+@Handler run  "Immunizations/WorkflowMPage/SidePanel/Helpers".SidePanelTopHeaderRectangle**)
+Function sidePanelTopHeaderRectangle
+	WaitFor 120, image:"Immunizations/WorkflowMPage/SidePanel/TL_Window"
+	return (imageLocation("Immunizations/WorkflowMPage/SidePanel/TL_Window"),imageLocation("Immunizations/WorkflowMPage/SidePanel/BR_Header"))
+End sidePanelTopHeaderRectangle

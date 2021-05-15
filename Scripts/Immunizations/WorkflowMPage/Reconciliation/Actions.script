@@ -1,0 +1,13 @@
+﻿(* refreshes and reopens reconciliation dialog
+@Handler - Run "Immunizations/WorkflowMPage/Reconciliation/Actions".refreshModalWindow
+*)
+on refreshModalWindow
+	click item 1 of EveryImageLocation("Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button")
+	waitFor 100,  "Immunizations/WorkflowMPage/Table/TL_Workflow"
+	if imageFound("Immunizations/WorkflowMPage/Table/ReconcileBanner")
+		run "Immunizations/WorkflowMPage/Table/Actions".clickReconcileBanners
+	else
+		run "Immunizations/WorkflowMPage/Table/Actions".clickReconcileHyperlink
+	end if
+	waitFor 30, "Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header"
+end refreshModalWindow

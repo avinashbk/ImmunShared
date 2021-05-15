@@ -1,0 +1,35 @@
+﻿(** Return the search rectangle that contains the entire tab list
+@Return the coordinates of a search rectangle
+@Handler run "Immunizations/Common/Helpers".tabListSearchRectangle
+**)
+Function tabListSearchRectangle 
+	return (imageLocation("Immunizations/Common/TL_TopPane"), imageLocation("Immunizations/Common/BR_TopPane"))
+end tabListSearchRectangle
+
+(** Return the search rectangle for a field value
+@Param fieldLabel - field label to validate the value for (e.g. minimum for earliest as utilized with field label JSON)
+@Param rectangle - rectangle to find the field label
+@Return the coordinates of a search rectangle for the right pane body
+@Handler "Immunizations/Common/Helpers".fieldValueSearchRectangle(fieldLabel, rectangle)
+**)
+function fieldValueSearchRectangle fieldLabel, rectangle
+	return imageRectangle(text:fieldLabel,searchRectangle:rectangle)+(-5,-5,250,7)
+end fieldValueSearchRectangle
+
+(** Rectangle based off of given image with offsets as parameters
+@Param image - the image the rectangle will be built off of 
+@Param x1 - x coordinate offset from the top of the image
+@Param y1 - y coordinate offset from the top of the image
+@Param x2 - x coordinate offset from the bottom of the image
+@Param y2 - y coordinate offset from the bottom of the image
+@Param searchRectangle - the rectangle where the image is located to help find the image faster (does NOT need to be passed in, only if desired)
+@Return a rectangle based off of the image and offset
+@Handler set rectangle to "Immunizations/Common/Helpers".offsetImageRectangle (image, x1, y1, x2, y2, searchRectangle)
+**)
+function offsetImageRectangle(image, x1, y1, x2, y2, searchRectangle)
+	if searchRectangle is empty
+		return imageRectangle(image:image)+(x1,y1,x2,y2)
+	end if
+	return imageRectangle(image:image,searchRectangle:searchRectangle)+(x1,y1,x2,y2)
+end offsetImageRectangle
+

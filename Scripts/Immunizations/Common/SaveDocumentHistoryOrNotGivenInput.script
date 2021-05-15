@@ -1,0 +1,36 @@
+﻿(** Saves the input for document history and/or not given dialog and refresh the component if the dialog does not close
+@Param Button - the save or cancel button to be clicked
+@Handler
+     run "Immunizations/Common/SaveDocumentHistoryOrNotGivenInput".clickButton
+**)
+On clickButton button
+	if imagefound( "Immunizations/Common/ChartingDialog/SelectButton/SelectButtonEnabled")
+		click FoundImageLocation()
+	else
+		Click (Text:button,EnableAggressiveTextExtraction:"True",searchRectangle:("Immunizations/Common/DocumentHistory/TL_Dialog","Immunizations/Common/DocumentHistory/BR_Dialog"))
+	end if	
+	// set the flag to false
+	set isChartDlgClosed to false
+	
+	// check if the X (close) button disappears in 30 seconds
+	repeat for 30 seconds
+		if not ImageFound(image:"Immunizations/Common/DocumentHistory/TL_Dialog")
+			set isChartDlgClosed to true
+			exit repeat
+		end if
+	end repeat
+	
+	// if the dialog is not closed, then refresh the component
+	if not isChartDlgClosed
+		if imageFound("Immunizations/Forecaster-Forecast/GreyForecastButton")
+			set inForecastView to true
+		end if
+		LogWarning "Document History/Chart Not Given did not close. Refreshing mPage..."
+		run "Immunizations/Common/Actions".temporaryRefreshClick
+		if inForecastView is true
+			run "Immunizations/WorkflowMPage/Table/Actions".clickViewForecast viewForecast
+		end if
+	end if
+	
+	run "Immunizations/Common/Actions".temporaryBypassServerDownErrorDlg "IMMUN-1802"	
+End clickButton

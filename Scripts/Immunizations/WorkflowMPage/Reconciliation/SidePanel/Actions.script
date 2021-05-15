@@ -1,0 +1,40 @@
+﻿(**This handler will click add with changes
+@Param rectangle - the area that you would like to click add with changes within (e.g. sidePanelHeaderRectangle)
+@Handler 
+     run "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Actions".clickAddWithChanges rectangle**)
+on clickAddWithChanges rectangle
+	click imagelocation(image:"Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Split_Button", searchRectangle:rectangle) 
+	click imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_With_Changes", searchRectangle:rectangle)
+end clickAddWithChanges
+
+(**This handler will close the side panel
+@Handler 
+     run "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Actions".closeSidePanel**)
+on closeSidePanel
+	set rectangle to imageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/View_Outside_Records_Header") + (0, 30, 1750, 600)
+	click image: "Immunizations/WorkflowMPage/Reconciliation/Headers/X_Button" ,searchRectangle: rectangle
+end closeSidePanel
+
+(**This handler will take an action in the side panel
+@Param
+@Handler 
+     run "Immunizations/WorkflowMPage/Reconciliation/SidePanel/Actions".addRejectUndo action**)
+on addRejectUndo action
+	set sidePanelHeaderRectangle to "Immunizations/WorkflowMPage/SidePanel/Helpers".sidePanelHeaderRectangle
+	if action = "reject" 
+		click image:"Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Reject_Button",  searchRectangle:sidePanelHeaderRectangle
+		if imageFound("Immunizations/Setup/Caution_Icon")
+			typeText "n"
+		end if 
+	else if action = "undo" 
+		click image:"Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Undo_Button",  searchRectangle:sidePanelHeaderRectangle
+	else	
+		click image: "Immunizations/WorkflowMPage/Reconciliation/Outside_Record_Table/Action_Column/Add_Button",  searchRectangle:sidePanelHeaderRectangle
+		if imageFound("Immunizations/Setup/Caution_Icon")
+			typeText "n"
+		end if 
+	end if
+	repeat until not imageFound(image:"Immunizations/WorkflowMPage/Reconciliation/SidePanel/X_button")
+		wait 1
+	end repeat
+end addRejectUndo

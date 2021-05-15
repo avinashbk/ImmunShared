@@ -1,0 +1,35 @@
+﻿(**Returns the search rectangle of the document history dialog
+@Returns search rectangle of document history dialog
+@Handler run "Immunizations/Common/DocumentHistory/Helpers".DialogSearchRectangle**)
+function DialogSearchRectangle
+	return (imagelocation("Immunizations/Common/DocumentHistory/TL_Dialog"),imageLocation("Immunizations/Common/DocumentHistory/BR_Dialog"))
+End DialogSearchRectangle
+
+(**Returns the search rectangle of the document history dialog
+@Returns search rectangle of document history dialog
+@Handler run "Immunizations/Common/DocumentHistory/Helpers".productSearchRectangle**)
+function productSearchRectangle
+	return [imagelocation("Immunizations/Common/DocumentHistory/TL_Dialog")+[150,200],imageLocation("Immunizations/Common/DocumentHistory/BR_Dialog")+[0,200]]
+End productSearchRectangle
+
+(**Returns the search rectangle of checkmark or red asterisk
+@Param Text - Vaccine name - Name of the vaccine
+@Returns the search rectangle of the checkmark or the red asterisk towards the left of the vaccine
+@Handler
+ run "Immunizations/Common/DocumentHistory/Validations".asteriskOrCheckmarkSearchRectangle VaccineName**)
+function asteriskOrCheckmarkSearchRectangle VaccineName
+	put imagerectangle("Immunizations/Common/Image_AddImmunizations").bottomleft() into Immunizations
+	insert Immunizations + (200,350) into Immunizations
+	put imagerectangle(text:VaccineName,searchRectangle:(Immunizations)).topLeft() into ImmunSearch
+	insert ImmunSearch + (-30,20) into ImmunSearch
+	return ImmunSearch
+end asteriskOrCheckmarkSearchRectangle
+
+(**Returns the search rectangle of the Administration Date dropdown
+@Returns the search rectangle of the Administration Date dropdown
+@Handler run "Immunizations/Common/DocumentHistory/Helpers".administrationDateOptionsSearchRectangle**)
+function administrationDateOptionsSearchRectangle
+	Set rectangle to  "Immunizations/Common/DocumentHistory/Helpers".DialogSearchRectangle
+	Click imageLocation(Text:"Administration Date", searchrectangle:(rectangle))+(0,20)
+	return (imageLocation(Text:"Administration Date")+(-70,20),imageLocation(Text:"Administration Date")+(20,80))
+end administrationDateOptionsSearchRectangle

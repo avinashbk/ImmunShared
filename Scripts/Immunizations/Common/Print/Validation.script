@@ -1,0 +1,7 @@
+﻿(**Saves the print report
+@Handler run "Immunizations/Common/Print/Validation".printRecordSaved**)
+On printRecordSaved 
+	if not imageFound("Immunizations/Common/Print/Icon_Save_As")
+		logSuccess "Print Report saved as PDF"
+	end if
+End printRecordSaved

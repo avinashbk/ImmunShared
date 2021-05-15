@@ -1,0 +1,69 @@
+﻿(** Return the search Rectangle encloseing the Vaccine Column of Immunization Forecaster Table
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterVaccineColumnSearchRectangle()
+**)
+function immunizationForecasterVaccineColumnSearchRectangle
+	set immunizationForecasterContentRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle("Immunization Forecaster")
+	
+	set topLeft to immunizationForecasterContentRectangle.topLeft
+	set bottomRight to ((immunizationForecasterContentRectangle.left + (immunizationForecasterContentRectangle.width / 5)) + 7, immunizationForecasterContentRectangle.bottom)
+	
+	return (topLeft, bottomRight)
+end immunizationForecasterVaccineColumnSearchRectangle
+
+(** Return the search Rectangle encloseing the Earliest Date Column of Immunization Forecaster Table
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterEarliestDateColumnSearchRectangle()
+**)
+function immunizationForecasterEarliestDateColumnSearchRectangle
+	set immunizationForecasterContentRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle("Immunization Forecaster")
+	
+	set topLeft to immunizationForecasterContentRectangle.topLeft + ((immunizationForecasterContentRectangle.width / 5) + 7, 0)
+	set bottomRight to ((immunizationForecasterContentRectangle.left + (immunizationForecasterContentRectangle.width / 5) * 2) + 7, immunizationForecasterContentRectangle.bottom)
+	
+	return (topLeft, bottomRight)
+end immunizationForecasterEarliestDateColumnSearchRectangle
+
+(** Return the search Rectangle encloseing the Recommended Date Column of Immunization Forecaster Table
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterRecommendedDateColumnSearchRectangle()
+**)
+function immunizationForecasterRecommendedDateColumnSearchRectangle
+	set immunizationForecasterContentRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle("Immunization Forecaster")
+	
+	set topLeft to immunizationForecasterContentRectangle.topLeft + ((immunizationForecasterContentRectangle.width / 5)*2 + 7, 0)
+	set bottomRight to ((immunizationForecasterContentRectangle.left + (immunizationForecasterContentRectangle.width / 5) * 3), immunizationForecasterContentRectangle.bottom)
+	
+	return (topLeft, bottomRight)
+end immunizationForecasterRecommendedDateColumnSearchRectangle
+
+(** Return the search Rectangle encloseing the Overdue Date Column of Immunization Forecaster Table
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterOverdueDateColumnSearchRectangle()
+**)
+function immunizationForecasterOverdueDateColumnSearchRectangle
+	set immunizationForecasterContentRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle("Immunization Forecaster")
+	
+	set topLeft to immunizationForecasterContentRectangle.topLeft + ((immunizationForecasterContentRectangle.width / 5)*3, 0)
+	set bottomRight to ((immunizationForecasterContentRectangle.left + (immunizationForecasterContentRectangle.width / 5) * 4) - 3, immunizationForecasterContentRectangle.bottom)
+	
+	return (topLeft, bottomRight)
+end immunizationForecasterOverdueDateColumnSearchRectangle
+
+(** Return the search Rectangle encloseing the Latest Date Column of Immunization Forecaster Table
+@return - coordinates of the SearchRectangle
+@Handler
+     "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/ImmunizationForecaster/Helpers".immunizationForecasterLatestDateColumnSearchRectangle()
+**)
+function immunizationForecasterLatestDateColumnSearchRectangle
+	set immunizationForecasterContentRectangle to "Immunizations/WorkflowMPage/Reconciliation/RegistryForecast/Tables/Helpers".tableContentSearchRectangle("Immunization Forecaster")
+	
+	set topLeft to immunizationForecasterContentRectangle.topLeft + ((immunizationForecasterContentRectangle.width / 5)*4 - 3, 0)
+	set bottomRight to ((immunizationForecasterContentRectangle.left + (immunizationForecasterContentRectangle.width / 5) * 5) - 3, immunizationForecasterContentRectangle.bottom)
+	
+	return (topLeft, bottomRight)
+end immunizationForecasterLatestDateColumnSearchRectangle

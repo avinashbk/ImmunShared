@@ -1,0 +1,26 @@
+ {
+ 	"SOLGM":[{
+		"date":"2018-09-11",
+		"resource":"Rolf",
+		"time":"1:00 PM",
+		"duration":"25 min",
+		"patient":"Lipper, Tanner",
+		"details":"AutoTest",
+		"patientFile":<<\IPDev-mPages-Shared-Immunizations\IPDev-mPages-Shared-Immunizations.suite\Resources\PatientFile.txt>>
+	}],
+	"SOLM64":[{
+		"date":"2018-09-11",
+		"resource":"Rolf",
+		"time":"1:00 PM",
+		"duration":"25 min",
+		"patient":"Lipper, Jimmy",
+		"details":"AutoTest",
+		"patientFile":<<\IPDev-mPages-Shared-Immunizations\IPDev-mPages-Shared-Immunizations.suite\Resources\PatientFile.txt>>	
+	}],
+	"1501EXPKG":[{
+	
+	}],
+	"S18VX":[{
+	
+	}]
+}

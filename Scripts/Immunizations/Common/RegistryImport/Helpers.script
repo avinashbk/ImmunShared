@@ -1,0 +1,29 @@
+﻿(** Return the search rectangle for the entire Registry Import window
+@Return the coordinates of a search rectangle
+@Handler
+     run "Immunizations/Common/RegistryImport/Helpers".dialogSearchRectangle
+**)
+function dialogSearchRectangle 
+	waitfor 100,image:"Immunizations/Common/RegistryImport/Label_MatchName"
+	return (ImageRectangle("Immunizations/Common/RegistryImport/Label_MatchName").topLeft+(-15,-20),ImageRectangle("Immunizations/Common/RegistryImport/Label_MatchName").bottomRight+(780, 550))
+end dialogSearchRectangle
+
+(** Return the search rectangle for the Registry details
+@Return the coordinates of a search rectangle
+@Handler
+    run "Immunizations/Common/RegistryImport/Helpers".registrySearchRectangle registryName
+**)
+function registrySearchRectangle registryName
+	set rectangle to "Immunizations/Common/RegistryImport/Helpers".dialogSearchRectangle 
+	return (ImageRectangle(text:registryName,SearchRectangle:rectangle).topLeft+(-15,-10), ImageRectangle(text:registryName,SearchRectangle:rectangle).bottomRight+(580, 250))
+end registrySearchRectangle
+
+(** Return the search rectangle for the entire Product on patient chart column
+@Return the coordinates of a search rectangle
+@Handler
+    run "Immunizations/Common/RegistryImport/Helpers".productOnPatientChartColumnSearchRectangle
+**)
+function productOnPatientChartColumnSearchRectangle 
+	set rectangle to "Immunizations/Common/RegistryImport/Helpers".dialogSearchRectangle 
+	return (ImageRectangle(text:"Product on patient's chart",validWords:"Product on patient's chart",SearchRectangle:rectangle).topLeft+(-15,-10), ImageRectangle(text:"Product on patient's chart",validWords:"Product on patient's chart",SearchRectangle:rectangle).bottomRight+(120, 430))
+end productOnPatientChartColumnSearchRectangle

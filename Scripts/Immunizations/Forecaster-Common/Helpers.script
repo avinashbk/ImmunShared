@@ -1,0 +1,48 @@
+﻿(** Return the search rectangle for the first column
+@Return the coordinates of a search rectangle for the first column
+@Handler 
+     "Immunizations/Forecaster-Common/Helpers".firstcolumnSearchRectangle()
+**)
+function firstColumnSearchRectangle
+	return (imageLocation("Immunizations/Forecaster-Common/Search/TL_FirstColumn"),imageLocation("Immunizations/Forecaster-Common/Search/BR_FirstColumn"))
+end firstColumnSearchRectangle
+
+(** Return the search rectangle for the Other Vaccines section
+@param text - The label for 'Other Vaccines' row
+@Return the coordinates of a search rectangle for the first column
+@Handler 
+     "Immunizations/Forecaster-Common/Helpers".otherVaccinesColumnSearchRectangle(text)
+**)
+function otherVaccinesColumnSearchRectangle text
+	return ((imageLocation(text:text))+(-50,-20),(FoundImageLocation())+(225,200))
+end otherVaccinesColumnSearchRectangle
+
+
+(** Return the search rectangle for the first column
+@Return the coordinates of a search rectangle for the first column
+@Handler 
+     "Immunizations/Forecaster-Common/Helpers".largeFirstColumnSearchRectangle()
+**)
+function largeFirstColumnSearchRectangle
+	return (imageLocation("Immunizations/Forecaster-Common/Search/TL_FirstColumn"),imageLocation("Immunizations/Forecaster-Common/Search/BR_FirstColumn")+(58,0))
+end largeFirstColumnSearchRectangle
+
+(** Return the search rectangle for the first column
+@Return the coordinates of a search rectangle for the first column
+@Handler 
+     "Immunizations/Forecaster-Common/Helpers".smallFirstColumnSearchRectangle()
+**)
+function smallFirstColumnSearchRectangle
+	return (imageLocation("Immunizations/Forecaster-Common/Search/TL_FirstColumn"),imageLocation("Immunizations/Forecaster-Common/Search/BR_FirstColumn")+(-120,0))
+end smallFirstColumnSearchRectangle
+
+(** Return the search rectangle 'did not count' text upon hovering the DidNotCount Icon
+@Return the coordinates of a search rectangle
+@Handler run "Immunizations/Forecaster-Common/Helpers".didNotCountSearchRectangle
+**)
+Function didNotCountSearchRectangle 
+	put ImageLocation("Immunizations/Common/DidNotCount")+(-30,-30) into TopLeft
+	put ImageLocation("Immunizations/Common/DidNotCount")+(100,100) into BottomRight
+	moveto ("Immunizations/Common/DidNotCount")
+	return (TopLeft,BottomRight)
+end didNotCountSearchRectangle

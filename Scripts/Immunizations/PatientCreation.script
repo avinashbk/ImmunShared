@@ -1,0 +1,677 @@
+﻿(** Open PMLaunch application
+@Param Username - The username to sign into millennium
+@Param Password - The password used to sign into millennium
+@Param Domain - The domain testing is occurring in
+@Handler
+     run "Immunizations/PatientCreation".openPMLaunch username, password, domain
+**)
+on openPMLaunch username, password, domain
+	typeText windowsKey &"r"
+	wait 1 
+	typeText"pmlaunch.exe", returnKey
+	run "Millennium_Login_window".LogIntoMillenniumApps username, password, domain
+	wait 3
+	if ImageFound(image:"Immunizations/PatientCreation/PMLaunchIconHighlighted",waitFor:5)
+		click FoundImageLocation()
+	end if
+	if ImageFound(image:"Immunizations/PatientCreation/PMLaunchIcon", waitFor:30)
+		click FoundImageLocation()+(50,0)
+	end if
+	typeText windowsKey & upArrow
+end openPMLaunch
+
+(** Navigate to the conversation and open it
+@Param Conversation - The PM conversation name
+@Handler
+     run "Immunizations/PatientCreation".openConversation conversation
+**)
+on openConversation conversation
+	TypeText conversation	
+	wait 5
+	TypeText returnKey
+end openConversation
+
+(** Search for the patient using first and last name (the full name of t
+he patient must be unique for the domain being tested in (shouldn't return more than 1 patient))
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Handler
+     run "Immunizations/PatientCreation".searchPatient lastName, firstName
+**)
+on searchPatient lastName, firstName
+	set rectangle to ImageRectangle(image:"Immunizations/PatientCreation/MagnifyingGlassIcon", waitFor:120)+(0,40,250,800)
+	if ImageFound(text:"Last Name", waitFor:5, searchRectangle:rectangle)
+		Click FoundImageLocation()+(0,15)
+		TypeText lastName
+		click ImageLocation(text:"First Name")+(0,15)
+		TypeText firstName & returnKey
+	else 
+		Click imageLocation(text:"Name", waitFor:10, searchRectangle:rectangle)+(0,15)
+		TypeText lastName & "," && firstName & returnKey
+	end if
+	//TypeText lastName & returnKey
+	if imageFound(text:"Search Quality", waitFor:0, searchRectangle:rectangle)
+		typeText returnKey
+	end if
+end searchPatient
+
+(** Patient has been searched, handler interacts with no results found to create the patient and/or the patient returned to grab the personID. Add valid Encounter info like Location info and/or the patient returned to grab the "FIN # (Financial Number)" (NOTE: Conversation should be "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" for adding Location Info to an Encounter, otherwise Conversation should be "HMAutomation")
+@Param encounterOrg - The encounter org for the patient
+@Param firstName - The first name of the patient
+@Param sex - The sex of the patient
+@Param dob - The dob of the patient
+@Param encounterType - The encounter type for the patient
+@Param Conversation (optional) - The PMLaunch conversation name. If not passed or passed as 'empty' then 'HMAutomation' conversation will be used
+@Param buildingDisplayName (optional) - The display name of the Building in the Facility
+@Param unitDisplayName (optional) - The Unit display name in the Building
+@Param roomName (optional) - The room name in the Unit
+@Handler
+     run "Immunizations/PatientCreation".patientSearched encounterOrg, firstName, sex, format, dob, encounterType, conversation, buildingDisplayName, unitDisplayName, roomName
+**)
+on patientSearched encounterOrg, firstName, sex, format, dob, encounterType, conversation, buildingDisplayName, unitDisplayName, roomName
+	set rectangle to ImageRectangle(image:"Immunizations/PatientCreation/MagnifyingGlassIcon", waitFor:120)+(250,50,1250,800)
+	if imageFound(text:"No persons found", validCharacters:"*", searchRectangle: rectangle) or imageFound("Immunizations/PatientCreation/noPersonsFound")
+		if imagefound(text:"Add Person", searchRectangle:rectangle) then
+			click FoundImageLocation()
+		else
+			click image:"Immunizations/PatientCreation/AddPerson"
+		end if
+		
+		if imageFound(image:"Immunizations/PatientCreation/Img_NewEpisode", waitfor:30) then typeText escapeKey
+		run "Immunizations/PatientCreation".setEncounterOrg encounterOrg
+		
+		if (conversation is in ("HMAutomation", empty) ignoring case)
+			run "Immunizations/PatientCreation".createPatient firstName, sex, format, dob, encounterType
+		else if (conversation is in ("ERM Add/Modify Encounter", "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH") ignoring case)
+			run "Immunizations/PatientCreation".createPatientWithEncounterLocation firstName, sex, format, dob, encounterType, buildingDisplayName, unitDisplayName, roomName
+		end if
+		
+		WaitFor 15, "Immunizations/PatientCreation/PMLaunchIcon"
+		click ImageLocation("Immunizations/PatientCreation/PMLaunchIcon")+(150,0)
+	else if ImageFound(text:"No Encounters Found", searchRectangle:rectangle)
+		click text:"OK", SearchRectangle:rectangle
+		
+		if imageFound(image:"Immunizations/PatientCreation/Img_NewEpisode", waitfor:30) then typeText escapeKey
+		run "Immunizations/PatientCreation".setEncounterOrg encounterOrg  
+	else
+		logwarning "Unable to find 'No persons found' text."
+	end if
+end patientSearched
+
+(** Patient has been searched, handler interacts with no results found to create the patient and/or the patient returned to grab the personID
+@Param Username - The username to sign into millennium
+@Param Password - The password used to sign into millennium
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param Domain - The domain testing is occurring in
+@Param cancelConversation - The name of the conversation
+@Param transactionReason - The reason for the cancel encounter
+@Handler
+     run "Immunizations/PatientCreation".cancelEncounter username, password, domain,conver,lastName,firstname,transactionReason
+**)
+on cancelEncounter  username, password, domain,cancelConversation,lastName,firstname,transactionReason
+	run "Immunizations/PatientCreation".openPMLaunch username, password, domain
+	run "Immunizations/PatientCreation".openConversation cancelConversation
+	run "Immunizations/PatientCreation".searchPatient lastName, firstName
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	repeat 17 times
+		TypeText tabKey
+	end repeat
+	TypeText transactionReason
+	wait 1
+	TypeText tabKey
+	TypeText tabKey
+	TypeText returnKey
+end cancelEncounter
+
+(** Patient has been searched, handler searches for OK button to enter the renamePatient handler OR renamePatientERM handler based on the 'conversation' input
+@Param newLastName - The new last name of the patient you wish to retire
+@Param Conversation (optional) - The PMLaunch conversation name. If not passed or passed as 'empty' then 'HMAutomation' conversation will be used
+@Handler
+     run "Immunizations/PatientCreation".renamePatientSearched newLastName, conversation
+**)
+on renamePatientSearched newLastName, conversation
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	
+	if (conversation is in ("HMAutomation", empty) ignoring case)
+		run "Immunizations/PatientCreation".renamePatient newLastName
+	else if (conversation is in ("ERM Add/Modify Encounter", "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH") ignoring case)
+		run "Immunizations/PatientCreation".renamePatientERM newLastName
+	end if
+end renamePatientSearched
+
+(** Set the encounter org to create an encounter for the patient.
+@Param encounterOrg - The encounter org for the patient
+@Handler
+     run "Immunizations/PatientCreation".setEncounterOrg encounterOrg
+**)
+on setEncounterOrg encounterOrg
+	repeat 2 times
+		typeText encounterOrg
+		typeText returnKey
+		typeText tabKey
+	end repeat
+	typeText returnKey
+end setEncounterOrg
+
+(** Create patient by entering patient details in the HMAutomation conversation (will not work for other conversations unless the fields are located in the same index)
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param encounterOrg - The encounter org for the patient
+@Param sex - The sex of the patient
+@Param dob - The dob of the patient
+@Param encounterType - The encounter type for the patient
+@Handler
+     run "Immunizations/PatientCreation".createPatient firstName, lastName, sex, dob, encounterType
+**)
+on createPatient firstName, sex, format, dob, encounterType
+	set rectangle to imageRectangle(image:"Immunizations/PatientCreation/ConversationIcon", waitFor:60)+(150,300,400,400)
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	typeText tabKey
+	typeText controlKey & "a" 
+	typeText firstName
+	repeat 3 times
+		typeText tabKey	
+	end repeat
+	typeText sex
+	typeText tabKey
+	typeText formattedTime(format, dob)
+	typeText tabkey
+	if dob is today
+		set the clockFormat to "24hrs"
+		typeText the time
+	else 
+		typeText "1200"
+	end if
+	repeat 5 times
+		typeText tabKey
+	end repeat
+	typeText formattedTime(format, today - 1 day)
+	repeat 2 times
+		typeText tabKey	
+	end repeat
+	typeText encounterType
+	typeText tabKey
+	typeText "Active"
+	typeText tabKey
+	If ImageFound(text:"ENG18", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	If ImageFound(text:"SOLGM", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	If ImageFound(text:"S18DA", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	typeText returnKey
+end createPatient
+
+(** Rename existing patient by entering patient details in the HMAutomation conversation (will not work for other conversations unless the fields are located in the same index)
+@Param newLastName - The new last name of the patient
+@Handler
+     run "Immunizations/PatientCreation".renamePatient newLastName
+**)
+on renamePatient newLastName
+	set rectangle to imageRectangle(image:"Immunizations/PatientCreation/ConversationIcon", waitFor:60)+(150,300,400,400)
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	repeat 3 times
+		typeText tabKey	
+	end repeat
+	typeText controlKey & "a"  
+	typeText newLastName 
+	repeat 12 times
+		typeText tabKey	
+	end repeat
+	If ImageFound(text:"ENG18", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	If ImageFound(text:"S18DA", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	typeText returnKey
+	if imagefound(image:"Immunizations/PatientCreation/Button_Yes", waitfor:20)
+		typetext returnKey
+	else if imagefound(text:"commit this change", waitfor:20)
+		typetext returnKey
+	else if imagefound(text:"The person", waitfor:20)
+		typetext returnKey
+	else
+		log "Name change pop up has not been found"
+	end if 
+end renamePatient
+
+(** Rename existing patient by entering patient details in the HMAutomation conversation (will not work for other conversations unless the fields are located in the same index)
+@Param newLastName - The new last name of the patient
+@Handler
+     run "Immunizations/PatientCreation".renamePatient newLastName
+**)
+on renamePatientNoEncounter newLastName, encounterType
+	set rectangle to imageRectangle(image:"Immunizations/PatientCreation/ConversationIcon", waitFor:60)+(150,300,400,400)
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	repeat 2 times
+		typeText tabKey	
+	end repeat
+	typeText controlKey & "a"  
+	typeText newLastName 
+	repeat 10 times
+		typeText tabKey	
+	end repeat
+	If ImageFound(text:"ENG18", waitFor:3, searchRectangle:rectangle) //Domain text is being used as the button image and text have been unreliable and required more maintenance (if multiple domains need added they can be added to this condition)
+		typeText tabKey
+	end if
+	typeText encounterType 
+	repeat 2 times
+		typeText tabKey	
+	end repeat
+	TypeText returnKey
+	if imagefound(image:"Immunizations/PatientCreation/Button_Yes", waitfor:20)
+		typetext returnKey
+	else if imagefound(text:"commit this change", waitfor:20)
+		typetext returnKey
+	else if imagefound(text:"The person", waitfor:20)
+		typetext returnKey
+	else
+		log "Name change pop up has not been found"
+	end if 
+end renamePatientNoEncounter
+
+
+(** Adjusts only the DOB for patients who have no data added to them. Do not run cleanup on these patients. 
+@Param dob - The dob you would like the patient to have
+@Handler
+     run "Immunizations/PatientCreation".changedobPatientSearched dob
+**)
+on changedobPatientSearched format, dob
+	set rectangle to imageRectangle(image:"Immunizations/PatientCreation/ConversationIcon", waitFor:60)+(150,300,400,400)
+	repeat 6 times
+		typeText tabKey	
+	end repeat
+	typetext controlKey & "a"
+	typeText formattedTime(format, dob)
+	repeat 9 times
+		typeText tabKey	
+	end repeat
+	if dob is today
+		set the clockFormat to "24hrs"
+		typeText the time
+	else 
+		typeText "1200"
+	end if
+	If ImageFound(text:"ENG18", waitFor:3, searchRectangle:rectangle)
+		typeText tabKey
+	end if
+	typetext returnkey
+end changedobPatientSearched
+
+(** Patient has been searched, handler interacts with no results found to adjust the date of birth of the patient
+@Param dob - The dob of the patient
+@Handler
+     run "Immunizations/PatientCreation".changedobPatient dob
+**)
+on changedobPatient format, dob
+	set rectangle to ImageRectangle(image:"Immunizations/PatientCreation/MagnifyingGlassIcon", waitFor:120)+(250,20,1250,800)
+	click text:"OK", searchRectangle:rectangle 
+	run "Immunizations/PatientCreation".changedobPatientSearched format, dob
+end changedobPatient
+
+(** Navigate to the conversation and open it. This version utilizes the continuous mode which will automatically reopen the patient search after creating/renaming/modifying a patient. This will prevent the re opening of the conversation after every patient. 
+@Param Conversation - The PM conversation name
+@Handler
+     run "Immunizations/PatientCreation".openConversationContinuous conversation
+**)
+on openConversationContinuous conversation
+	TypeText conversation	
+	wait 1
+	RightClick ImageLocation("Immunizations/PatientCreation/PMLaunch_Blue")
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/StartConversation_TL") + (-40,-5,230,170)
+	if ImageFound(image:"Immunizations/PatientCreation/checkBox", SearchRectangle:rectangle)
+		click text: "Start Conversation", SearchRectangle: rectangle
+	else 
+		click text:"Continuous", SearchRectangle: rectangle
+		TypeText returnKey
+	end if
+	wait 5
+end openConversationContinuous
+
+(** This handler clears all relevant immunizations tables for a given patient
+@Param lastName - The last name of the patient you want to clean up 
+@Param firstName - The first name of the patient you want to clean up
+@Handler
+     run "Immunizations/PatientCreation".cleanupPatient lastName, firstName
+**)
+on cleanupPatient lastName, firstName
+	typeText controlKey & "r"
+	typeText "immunization_cleanup_script"
+	typeText tabKey
+	typeText controlKey & "a", deleteKey
+	typeText returnKey
+	TypeText tabKey repeated 2 times
+	typeText uppercase(lastName)
+	typeText tabKey
+	typeText uppercase(firstName)
+	typeText tabKey
+	typeText returnKey
+end cleanupPatient
+
+(** This handler updates the date of birth for a given patient 
+@Param lastName - The last name of the patient you want to clean up 
+@Param firstName - The first name of the patient you want to clean up
+@Param newDob - The new date of birth you want your patient to have. FORMAT for DOB - "dd-mmm-yyyy" example: 31-jan-2018
+@Handler
+     run "Immunizations/PatientCreation".updatePatientDOB  lastName, firstName, newDob
+**)
+on updatePatientDOB lastName, firstName, newDob
+	set newDob to formattedTime("%d-%b-%Y", newDob) 
+	put uppercase(lastName) into lastName
+	put uppercase(firstName) into firstName
+	put (lastName, firstName, newDob) into paramlist
+	typeText controlKey & "r"
+	typeText "person_dob_update"
+	typeText tabKey
+	typeText controlKey & "a", deleteKey
+	typeText returnKey
+	TypeText tabKey repeated 2 times
+	repeat for each item in paramlist
+		typeText item counter() of paramlist
+		typeText tabKey
+	end repeat
+	typeText returnKey
+end updatePatientDOB
+
+(** This handler updates the date of birth for a given patient and cleans up all Immunizations data 
+@-------NOTE------- This handler requires *IPDev-Millennium-Shared-HealthMaintenanceTools* to be added as a helper suite -------NOTE-------
+@Param username - The username to sign into millennium
+@Param password - The password used to sign into millennium
+@Param domain - The domain testing is occurring in
+@Param lastName - The last name of the patient you want to clean up 
+@Param firstName - The first name of the patient you want to clean up
+@Param newDob - The new date of birth you want your patient to have. FORMAT for DOB - "dd-mmm-yyyy" example: 31-jan-2018
+@Handler
+     run "Immunizations/PatientCreation".resetPatientToZeroState username, password, domain, lastName, firstName, newDob
+**)
+on resetPatientToZeroState username, password, domain, lastName, firstName, newDob
+	run "DiscernVisualDeveloper/Actions".openDiscernVisualDeveloper username, password, domain 
+	run "Immunizations/PatientCreation".cleanupPatient lastName, firstName
+	waitFor 100, "DiscernVisualDeveloper/Run_Prompt/No_Data_Found_Text"
+	run "Util".closeApplication 1
+	run "Immunizations/PatientCreation".updatePatientDOB  lastName, firstName, newDob
+	waitFor 100, "DiscernVisualDeveloper/Run_Prompt/No_Data_Found_Text"
+	run "Util".closeApplication 2
+end resetPatientToZeroState
+
+(* Select an Encounter from the Encounter List for the Patient
+@param newEncounterFlag - if set to TRUE, handler will not use other parameters, whereas setting it to FALSE will require the other parameters to be used
+@param facilityName - the Name of the facility for that encounter
+@param finNumber - the FIN # for that encounter
+@param facilityIndex (Optional) - index of the facility in case the Facility Name is repeating
+@handler
+    run "Immunizations/PatientCreation".selectEncounterInList newEncounterFlag, facilityName, finNumber, facilityIndex
+*)
+to selectEncounterInList newEncounterFlag, facilityName, finNumber, facilityIndex
+	if facilityIndex is in (empty, 0, "0", false) then set facilityIndex to 1
+	
+	run "Immunizations/PatientCreation".resizePatientSearchWindow
+	set patientSearchWindowRectangle to (imageLocation(image:"Immunizations/PatientCreation/MagnifyingGlassIcon", waitFor:10) + (-20,-20), imageLocation(image:"Immunizations/PatientCreation/Btn_Preview") + (10,10)) + ((260,40), (0,-40))
+	set patientSearchEncounterResultsPanelRectangle to  ((patientSearchWindowRectangle.left, patientSearchWindowRectangle.topLeft.y + patientSearchWindowRectangle.height/2), patientSearchWindowRectangle.bottomRight)
+	
+	if (not newEncounterFlag)
+		if ((facilityName is not empty) and (finNumber is not empty))
+			repeat with each facilityNameRectangle in everyImageRectangle(text:facilityName, searchRectangle: patientSearchEncounterResultsPanelRectangle, enhanceLocalContrast:true)
+				set facilityNameRowRectangle to ((patientSearchEncounterResultsPanelRectangle.left, facilityNameRectangle.topLeft.y - 3), (patientSearchEncounterResultsPanelRectangle.right, facilityNameRectangle.bottomRight.y + 3))
+				
+				if (imageFound(text:finNumber, enhanceLocalContrast:true, searchRectangle:facilityNameRowRectangle))
+					click foundImageLocation()
+					exit repeat
+				end if
+			end repeat
+		else if ((facilityName is not empty) and (finNumber is empty))
+			set  facilityRectangle to imageRectangle(text: "Facility", SearchRectangle:patientSearchEncounterResultsPanelRectangle, ignoreSpaces: true) + (-20, 0, 120, 430)
+			click item facilityIndex of everyImageLocation(text:facilityName, searchRectangle: facilityRectangle, enhanceLocalContrast:true, validCharacters: "*", ignoreSpaces: true)
+		else if ((facilityName is empty) and (finNumber is not empty))
+			click imageLocation(text:finNumber, searchRectangle: patientSearchEncounterResultsPanelRectangle, enhanceLocalContrast:true, ignoreSpaces: true)
+		else
+			LogError "Either the facilityName or finNumber or both should have a value."
+		end if
+	else
+		if (imageFound(text:"No encounters found", searchRectangle: patientSearchEncounterResultsPanelRectangle))
+			LogSuccess "No existing encounters found."
+		else
+			LogWarning "Existing Patient encounters found. Review parameter input."
+		end if
+	end if
+end selectEncounterInList
+
+(* Resize the Patient Search Window similar to maximizing for easier navigation
+@handler
+    run "Immunizations/PatientCreation".resizePatientSearchWindow
+*)
+to resizePatientSearchWindow
+	set patientSearchWindowTitleBar to imageLocation(image:"Immunizations/PatientCreation/MagnifyingGlassIcon", waitFor:10) + (30,0)
+	dragAndDrop patientSearchWindowTitleBar, (50, 20)
+	
+	set resizeBorderButton to imageLocation(image: "Immunizations/PatientCreation/Btn_Preview") + (3,3)
+	dragAndDrop resizeBorderButton, (connectionInfo().screenSize + (-10, -50))
+	
+	wait 2
+end resizePatientSearchWindow
+
+(** Create patient by entering patient details in the "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" conversation (will not work for other conversations unless the fields are located in the same index). (NOTE: grab the patient's "Medical Record Number/MRN" and "Financial Number/FIN #" that will be stored in the 'Global patientMrnNumber' and 'Global patientFinNumber' variables, respectively)
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param encounterOrg - The encounter org for the patient
+@Param sex - The sex of the patient
+@Param dob - The dob of the patient
+@Param encounterType - The encounter type for the patient
+@Param buildingDisplayName - The display name of the Building in the Facility
+@Param unitDisplayName - The Unit display name in the Building
+@Param roomName - The room name in the Unit
+@Handler
+     run "Immunizations/PatientCreation".createPatientWithEncounterLocation firstName, sex, format, dob, encounterType, buildingDisplayName, unitDisplayName, roomName
+**)
+on createPatientWithEncounterLocation firstName, sex, format, dob, encounterType, buildingDisplayName, unitDisplayName, roomName
+	waitfor 3, "Immunizations/PatientCreation/ConversationIcon"
+	typeText windowsKey & upArrow
+	wait 3 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	
+	typeText controlKey & "a" 
+	typeText firstName
+	click image:"Immunizations/PatientCreation/Lbl_BirthDate", waitFor:60
+	typeText formattedTime(format, dob)
+	TypeText tabKey
+	if dob is today
+		set the clockFormat to "24hrs"
+		typeText the time
+	else 
+		typeText "1200"
+	end if
+	
+	click image:"Immunizations/PatientCreation/Lbl_DemographicsInformation", waitFor:60
+	click image:"Immunizations/PatientCreation/Lbl_Sex", waitFor:60
+	TypeText sex
+	
+	click image:"Immunizations/PatientCreation/Lbl_IdentifiersInformation", waitFor:60
+	Click image:"Immunizations/PatientCreation/Lbl_MedicalRecordNumber", waitFor:60
+	typeText controlKey & "a"
+	typeText controlKey & "c"
+	set global patientMrnNumber to RemoteClipboard()
+	Click image:"Immunizations/PatientCreation/Lbl_FinancialNumber", waitFor:60
+	typeText controlKey & "a"
+	typeText controlKey & "c"
+	set global patientFinNumber to RemoteClipboard()
+	
+	click image:"Immunizations/PatientCreation/Lbl_EncounterInformation", waitFor:60
+	typeText tabkey
+	typeText formattedTime(format, today - 1 day)
+	typeText tabkey
+	typeText "0000"
+	typeText tabKey
+	typeText "Active"
+	typeText tabKey
+	typeText encounterType
+	
+	click image:"Immunizations/PatientCreation/Lbl_Building", waitFor:60
+	typeText buildingDisplayName
+	typeText tabKey
+	typeText unitDisplayName
+	typeText tabKey, tabKey
+	typeText roomName
+	
+	click "Immunizations/PatientCreation/Btn_OK"
+end createPatientWithEncounterLocation
+
+(** Rename existing patient by entering patient details in the "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" conversation (will not work for other conversations unless the fields are located in the same index)
+@Param newLastName - The new last name of the patient
+@Handler
+     run "Immunizations/PatientCreation".renamePatient newLastName
+**)
+on renamePatientERM newLastName
+	waitfor 3, "Immunizations/PatientCreation/ConversationIcon"
+	typeText windowsKey & upArrow
+	wait 3 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	
+	TypeText tabKey, tabKey
+	typeText controlKey & "a"
+	TypeText newLastName
+	click "Immunizations/PatientCreation/Btn_OK"
+	typeText returnKey
+end renamePatientERM
+
+(** Enter decease date and time for already created patient in the "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" or "HMAutomation" conversation
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param deceasedDate  - Pass the date 
+@Param Conversation (optional) - The PMLaunch conversation name. If not passed or passed as 'empty' then 'HMAutomation' conversation will be used
+@Handler
+     run "Immunizations/PatientCreation".enterDeceaseDateAndTime lastName, firstName, deceasedDate, conversation
+**)
+on enterDeceaseDateAndTime lastName, firstName, deceasedDate, conversation
+	run "Immunizations/PatientCreation".searchPatient lastName, firstName
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	waitFor 45, "Immunizations/PatientCreation/ConversationIcon"
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	if (conversation is in ("HMAutomation", empty) ignoring case)
+		click imageName: "Immunizations/PatientCreation/Lbl_DeceasedDate", waitFor: 60
+		typeText deceasedDate
+		typeText tabKey
+		typeText "0000"
+		click "Immunizations/PatientCreation/Btn_OK"
+	else if (conversation is in ("ERM Add/Modify Encounter", "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH") ignoring case)
+		click imageName: "Immunizations/PatientCreation/Lbl_DischargeInformation", waitFor: 60
+		click imageName: "Immunizations/PatientCreation/Lbl_DeceasedDate", waitFor: 60
+		typeText deceasedDate
+		typeText tabKey
+		typeText "0000"
+		click "Immunizations/PatientCreation/Btn_OK"
+	end if
+end enterDeceaseDateAndTime
+
+(** Select Prefered Contact Method for already created patient in the "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" conversation
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param preferedContactType  - Pass value (e.g, No preference, email, telephone, letter etc.,)
+@Handler
+     run "Immunizations/PatientCreation".selectPreferedContactMethod lastName, firstName, preferedContactType
+**)
+on selectPreferedContactMethod lastName, firstName, preferedContactType
+	run "Immunizations/PatientCreation".searchPatient lastName, firstName
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	waitFor 45, "Immunizations/PatientCreation/ConversationIcon"
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	click image:"Immunizations/PatientCreation/Lbl_DemographicsInformation", waitFor: 60
+	Repeat until ImageFound ("Immunizations/PatientCreation/Lbl_PreferredContactMethod")
+		click item 2 of EveryImageLocation("Immunizations/PatientCreation/Vertical_ScrollWheelDown")
+	End repeat
+	click "Immunizations/PatientCreation/Lbl_PreferredContactMethod"
+	typeText preferedContactType
+	click "Immunizations/PatientCreation/Btn_OK"
+end selectPreferedContactMethod
+
+(** Enter decease date and time for already created patient in the "ERM Automation A/M Encounter-Free Text-DO NOT TOUCH" or "HMAutomation" conversation
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param deceasedDate  - Remove the date for making patient active again
+@Param Conversation (optional) - The PMLaunch conversation name. If not passed or passed as 'empty' then 'HMAutomation' conversation will be used
+@Handler
+     run "Immunizations/PatientCreation".removeDeceaseDateAndTime lastName, firstName, conversation
+**)
+on removeDeceaseDateAndTime lastName, firstName, deceasedDate, conversation
+	run "Immunizations/PatientCreation".searchPatient lastName, firstName
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	waitFor 45, "Immunizations/PatientCreation/ConversationIcon"
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	if (conversation is in ("HMAutomation", empty) ignoring case)
+		click imageName: "Immunizations/PatientCreation/Lbl_DeceasedDate", waitFor: 60
+		typeText controlKey & "a"
+		typetext backspace
+		typeText tabKey
+		//typeText "0000"
+		click "Immunizations/PatientCreation/Btn_OK"
+	end if
+end removeDeceaseDateAndTime
+
+(** Enter decease type for already created patient in the "HMAutomation" conversation
+@Param firstName - The first name of the patient
+@Param lastName - The last name of the patient
+@Param type  - Either yes if the oatient is decease or else enter no
+@Param Conversation (optional) - The PMLaunch conversation name. If not passed or passed as 'empty' then 'HMAutomation' conversation will be used
+@Handler
+     run "Immunizations/PatientCreation".enterDeceaseType lastName, firstName, type, conversation
+**)
+on enterDeceaseType lastName, firstName, type, conversation
+	run "Immunizations/PatientCreation".searchPatient lastName, firstName
+	set rectangle to ImageRectangle("Immunizations/PatientCreation/MagnifyingGlassIcon")+(250,20,1250,800)
+	if imageFound(text:"OK",searchRectangle:rectangle)
+		click FoundImageLocation()
+	else if imageFound(image: "Immunizations/Setup/Icon_OKButton",searchRectangle:rectangle)
+		click FoundImageLocation()         
+	else
+		LogError "Unable to find OK button, please investigate."
+	end if
+	waitFor 45, "Immunizations/PatientCreation/ConversationIcon"
+	wait 1 //adding hard wait as a waitFor is insufficient for s18vx domain (will ctrl + a when the field isn't in focus and double type first name) and is quicker than trying to code to find the text\image then click the field.
+	if (conversation is in ("HMAutomation", empty) ignoring case)
+		repeat 8 times
+			typeText tabKey	
+		end repeat
+		typeText type 
+		typeText tabKey
+		//typeText "0000"
+		click "Immunizations/PatientCreation/Btn_OK"
+	end if
+end enterDeceaseType

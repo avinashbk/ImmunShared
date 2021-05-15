@@ -1,0 +1,76 @@
+﻿(**Interaction script for the RefineDialog functionality
+Opens Refine dialog from either the Reconciliation Modal Window
+@Handler run ""Immunizations/WorkflowMPage/Reconciliation/Refine/Actions".openDialog**)
+On OpenDialog
+	If imageFound(image: "Immunizations/WorkflowMPage/Reconciliation/Refine/Refine_Button/Refine_Button_White")
+		Click FoundimageLocation()
+	End If 
+End OpenDialog
+
+(**For completing the required details for Refine dialog
+@param firstName to be entered
+@param lastName to be entered
+@param middlesName to be entered
+@param DOB to be selected
+@param birthOrder to be entered
+@param mothersMaidenName to be entered
+@param mothersFirstName to be entered
+@param mothersMiddleName to be entered
+@param phoneNumber to be entered
+@param emailAddress to be entered
+@param addressLine1 to be entered
+@param addressLine2 to be entered
+@param city to be entered
+@param state to be entered
+@param zipCode to be entered
+@param country to be selected
+@param Rectangle to store the Top left and bottom right images which will be used frequently
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/Refine/Actions".refineAllFieldsInput firstName, lastName,middleName, DOB,birthOrder, sex,mothersMaidenName,mothersFirstName, mothersMiddleName, phoneNumber, emailAddress, addressLine1,addressLine2,city,state,zipCode,country**)
+On refineAllFieldsInput  firstName, motherMaiden, lastName, motherFirst, middleName, motherMiddle, dob, phoneNumber, birthOrder, emailAddress, sex, homeAddress, addressLine2, city, state, zipCode, country
+	Set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".RefineDialogRectangle
+	Click imageLocation(text:"First name:",searchRectangle:Rectangle)+(125,0)
+	typeText controlKey & "a"
+	repeat for each item in the parameterList
+		wait 1
+		typeText item counter() of the parameterlist
+		typeText tabKey
+		if item counter() of the parameterList is dob then 
+			Click imageLocation(text:"Date of birth:",searchRectangle:Rectangle)+(125,0)
+			run "Immunizations/Common/Actions".typeTextWithRepeat 4, tabKey
+		end if
+	end repeat
+End refineAllFieldsInput
+
+(**For entering the individual fields in the Refine Dialog
+@Param Field is the field name whose value has to be entered
+@Param Value is the data to be entered
+@Handler run "Immunizations/WorkflowMPage/Reconciliation/Refine/Actions".refineSingleFieldInput**)
+On refineSingleFieldInput Field,Value
+	Set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".RefineDialogRectangle
+	DoubleClick imageLocation(Text:Field, searchrectangle:(rectangle))+(150,0)
+	typeText controlKey & "a"
+	Typetext Value, returnKey
+	TypeText tabKey
+	TypeText shiftKey & tabKey	
+	TypeText rightArrow
+End refineSingleFieldInput
+
+
+(** Refines the query for Refine Dialog
+@Handler
+     run "Immunizations/WorkflowMPage/Reconciliation/Refine/Actions".clickRefine
+**)
+On clickRefine
+	set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".refineDialogRectangle 
+	Click imageLocation(image:"Immunizations/WorkflowMPage/Reconciliation/Refine/Refine_Button/Refine_Button_Blue",searchRectangle:rectangle) 
+End clickRefine
+
+
+(** Cancel the Refines query for Refine Dialog
+@Handler
+     run "Immunizations/WorkflowMPage/Reconciliation/Refine/Actions".clickCancelRefine
+**)
+On clickCancelRefine
+	set rectangle to "Immunizations/WorkflowMPage/Reconciliation/Refine/Helpers".refineDialogRectangle 
+	Click imageLocation(Text:"Cancel",searchRectangle:rectangle) 
+End clickCancelRefine

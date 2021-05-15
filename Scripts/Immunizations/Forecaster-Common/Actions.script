@@ -1,0 +1,46 @@
+﻿
+(**@Param TopPaneRectangle to store the top left and bottom right image under the function and then call that using this param
+**@Handler which will flip between the views such as Forecaster and List views  
+run "Immunizations/Forecaster-Common/Actions".ClickFlipViews
+**)
+On ClickFlipViews 
+	Set TopPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle+((0,25),(0,-35))
+	if imageFound(image: "Immunizations/Forecaster-Forecast/GreyForecastButton")
+		Click (image:"Immunizations/Forecast-List/whiteListButton", searchRectangle:TopPaneRectangle)
+		MoveTo (0,0)
+		WaitFor 30, "Immunizations/Forecaster-Forecast/WhiteForecastButton"
+		
+	else 
+		Click (image:"Immunizations/Forecaster-Forecast/WhiteForecastButton", searchRectangle:TopPaneRectangle)
+		MoveTo (0,0)
+		WaitFor 30, "Immunizations/Forecaster-Forecast/GreyForecastButton"
+	end if
+End ClickFlipViews
+
+
+(** Use this function to hide or show Uncharted records
+@Param setHidden - 'True' will hide Uncharted Records, 'False' will show (un-hide) uncharted Records
+@Handler
+     run "Immunizations/Forecaster-Common/Actions".ClickHideRecords setHidden
+**)
+On ClickHideRecords setHidden
+	Set TopPaneRectangle to "Immunizations/Common/Helpers".tabListSearchRectangle
+	set hideUnchartedRecordsMenuRectangle to ("Immunizations/Forecaster-Forecast/Common/Hamburger_BR", "Immunizations/Forecaster-Forecast/Common/Hamburger_TL")
+	
+	if not imageFound(Text:"Hide Uncharted Records", searchRectangle:hideUnchartedRecordsMenuRectangle, dpi:150)
+		Click imageLocation(imageName:"Immunizations/Forecaster-Forecast/Common/Hamburger_Button",searchRectangle:TopPaneRectangle)
+	end if
+	
+	moveTo imageLocation(Text:"Records", searchRectangle:hideUnchartedRecordsMenuRectangle, dpi:150) + (27,0)
+	
+	if setHidden is true and not imageFound(image:"Immunizations/Forecast-List/Icon_CheckedHideUnchartedRecords", SearchRectangle: hideUnchartedRecordsMenuRectangle)
+		Click Text:"Hide Uncharted Records",searchRectangle:hideUnchartedRecordsMenuRectangle, dpi:150
+	else if setHidden is false and imageFound(image:"Immunizations/Forecast-List/Icon_CheckedHideUnchartedRecords", SearchRectangle: hideUnchartedRecordsMenuRectangle)
+		Click Text:"Hide Uncharted Records",searchRectangle:hideUnchartedRecordsMenuRectangle, dpi:144
+	end if
+	
+	moveto (0,0)
+End ClickHideRecords
+
+
+

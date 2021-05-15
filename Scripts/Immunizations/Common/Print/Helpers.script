@@ -1,0 +1,147 @@
+﻿(** Return the search rectangle for the entire Vaccine column
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".vaccineColumnSearchRectangle()
+**)
+function vaccineColumnSearchRectangle 
+	return (imageLocation("Immunizations/Common/Print/TL_Vaccine")+ (-15,15), imageLocation("Immunizations/Common/Print/BR_Vaccine")+ (30, 550))
+end vaccineColumnSearchRectangle
+
+(** Return the search rectangle that contains the dateGiven search rectangle
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".dateGivenColumnSearchRectangle()
+**)
+function dateGivenColumnSearchRectangle 
+	return (imageLocation("Immunizations/Common/Print/TL_DateGiven")+ (-15, 5), imageLocation("Immunizations/Common/Print/BR_DateGiven")+ (30, 200))
+end dateGivenColumnSearchRectangle  
+
+(** Return the search rectangle for a given single vaccine group within the vaccine column
+@Param lastVaccineGroup - Should be passed in as a true or false value, true if it's the last vaccine group or only 1 vaccine group that exists in the print temple and false if there are multiple vaccine groups and it's not the last one at the bottom.
+@Param vaccineGroupIndex - The vaccine group index (1 for the first vaccine group row, 2 for the second vaccine group row, etc...)
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".vaccineGroupSearchRectangle(lastVaccineGroup, vaccineGroupIndex)
+**)
+function vaccineGroupSearchRectangle lastVaccineGroup, vaccineGroupIndex
+	Set rectangle to "Immunizations/Common/Print/Helpers".vaccineColumnSearchRectangle()
+	set topLeft to item vaccineGroupIndex of everyimageLocation(image:"Immunizations/Common/Print/TL_FirstColumnSeparator",searchRectangle:(rectangle)) + (-60, 0)
+	if lastVaccineGroup is "true"
+		set bottomRight to item 1 of everyimageLocation(image:"Immunizations/Common/Print/BR_FirstColumnLastEventSeparator",searchRectangle:(rectangle))
+	else
+		set bottomRight to item vaccineGroupIndex of everyimageLocation(image:"Immunizations/Common/Print/BR_FirstColumnSeparator",searchRectangle:(rectangle))
+	end if
+	return (topLeft, bottomRight)
+end vaccineGroupSearchRectangle
+
+(** Return the search rectangle for the date given for an individual vaccine group
+@Param lastVaccineGroup - Should be passed in as a true or false value, true if it's the last vaccine group or only 1 vaccine group that exists in the print temple and false if there are multiple vaccine groups and it's not the last one at the bottom.
+@Param vaccineGroupIndex - The vaccine group index (1 for the first vaccine group row, 2 for the second vaccine group row, etc...)
+@Param dateIndex - The index of the date given for an individual vaccine group (should not be for the entire column)
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".dateGivenSearchRectangle(lastVaccineGroup, vaccineGroupIndex, dateIndex)
+**)
+function dateGivenSearchRectangle lastVaccineGroup, vaccineGroupIndex, dateIndex
+	set rectangle to "Immunizations/Common/Print/Helpers". vaccineGroupSearchRectangle(lastVaccineGroup, vaccineGroupIndex)+((275,0),(305,5))
+	if dateIndex is not "1"
+		set topLeft to item dateIndex - 1 of everyimageLocation(image:"Immunizations/Common/Print/TL_SecondColumnSubsequentSeparator",searchRectangle:(rectangle))+(0,3)
+	else
+		set topLeft to item dateIndex of everyimageLocation(image:"Immunizations/Common/Print/TL_SecondColumnFirstSeparator",searchRectangle:(rectangle))
+		
+	end if
+	set bottomRight to topLeft+(310,35)
+	return (topLeft, bottomRight)
+end dateGivenSearchRectangle
+
+(** Return the search rectangle for the product
+@Param lastVaccineGroup - Should be passed in as a true or false value, true if it's the last vaccine group or only 1 vaccine group that exists in the print temple and false if there are multiple vaccine groups and it's not the last one at the bottom.
+@Param vaccineGroupIndex - The vaccine group index (1 for the first vaccine group row, 2 for the second vaccine group row, etc...)
+@Param productIndex - The index of the product for an individual vaccine group
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".productSearchRectangle(lastVaccineGroup, vaccineGroupIndex, productIndex)
+**)
+function productSearchRectangle lastVaccineGroup, vaccineGroupIndex, productIndex
+	set rectangle to "Immunizations/Common/Print/Helpers". vaccineGroupSearchRectangle(lastVaccineGroup, vaccineGroupIndex)+((585,-5),(1000,10))
+	set topLeft to item productIndex of everyimageLocation(image:"Immunizations/Common/Print/TL_ThirdColumnSeparator",searchRectangle:(rectangle))
+	set bottomRight to topLeft+(500,40)
+	return (topLeft, bottomRight)
+end productSearchRectangle
+
+(** Return the search rectangle for the Print report Header
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".ReportHeaderSearchRectangle()
+**)
+function reportHeaderSearchRectangle 
+	return(ImageLocation(Image:"Immunizations/Common/Print/Button_Print")+(13,70),ImageLocation(image:"Immunizations/Common/Print/Button_Print")+(1190,370))
+end reportHeaderSearchRectangle
+
+(** Return the search rectangle for the COVID Print report body
+@Return the coordinates of a search rectangle
+@Param fieldName - The name of the field to be searched
+@Handler
+     "Immunizations/Common/Print/Helpers".covidReportFieldRectangle(fieldName)
+**)
+function covidReportFieldRectangle fieldName
+	set rectangle to imageRectangle("Immunizations/Common/Print/Label_Notes") + (-50, -300, 1150, -10 )
+	return imageRectangle(text:fieldName, searchRectangle: rectangle) + (-80, 0, 130, 300)
+end covidReportFieldRectangle
+
+(** Return the search rectangle for the Print report Header for All Pages
+@Return the coordinates of a search rectangle around the label values
+@Label - label of the print report header section which you want to validate eg:Name,DOB,Sex,PCP,MRN and Report Run
+@Handler
+     "Immunizations/Common/Print/Helpers".ReportHeaderAllPages()
+**)
+function reportHeaderAllPagesSearchRectangle Label
+	Set Rectagle to "Immunizations/Common/Print/Helpers".ReportHeaderSearchRectangle()
+	put imageRectangle(text:Label,SearchRectangle:(Rectagle)).topRight into SearchArea1
+	put ImageRectangle(text:Label,SearchRectangle:(Rectagle)).topRight+(440,25) into SearchArea2
+	return (SearchArea1,SearchArea2)
+end reportHeaderAllPagesSearchRectangle
+
+(** Return the search rectangle for the Print report Footer
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".ReportFooterSearchRectangle()
+**)
+function reportFooterSearchRectangle 
+	click (75,175) --to change the focus
+	Repeat until ImageFound("Immunizations/Common/Print/Label_Page/Label_Page")
+		ScrollWheelDown 20
+	End Repeat 
+	Put ImageRectangle(Image:"Immunizations/Common/Print/Label_Page/Label_Page").topRight into SearchArea1
+	put ImageRectangle(Image:"Immunizations/Common/Print/Label_Page/Label_Page") .bottomRight+(70,4) into SearchArea2
+	Repeat until first char of ReadText(SearchArea1,SearchArea2) = last char of ReadText(SearchArea1,SearchArea2)
+		Click "Immunizations/Common/Print/Icon_NextPageEnable"
+		Typetext controlKey & EndKey
+		click (75,175) --to change the focus
+		Repeat until ImageFound("Immunizations/Common/Print/Label_Notes/Label_Notes")
+			ScrollWheelUp 10
+		End Repeat
+	End Repeat
+	click (75,175) --to change the focus
+	Repeat until ImageFound("Immunizations/Common/Print/Label_Notes/Label_Notes")
+		ScrollWheelUp 10
+	End Repeat
+	Put ImageRectangle(image:"Immunizations/Common/Print/Label_Notes/Label_Notes").topLeft into SearchArea3
+	put ImageRectangle (image:"Immunizations/Common/Print/Label_Notes/Label_Notes").bottomLeft +(1200,700) into SearchArea4
+	return (SearchArea3,SearchArea4)
+end reportFooterSearchRectangle
+
+(** Return the search rectangle for the Print report foot note
+@Return the coordinates of a search rectangle
+@Handler
+     "Immunizations/Common/Print/Helpers".reportFootNoteSearchRectangle()
+**)
+function reportFootNoteSearchRectangle
+	click (75,175) --to change the focus
+	Repeat until ImageFound("Immunizations/Common/DidNotCount/PrintReport/ReportFoot")
+		ScrollWheelDown 20
+	End Repeat
+	put ImageRectangle(Image:"Immunizations/Common/DidNotCount/PrintReport/ReportFoot").topRight into SearchArea1
+	put ImageRectangle(Image:"Immunizations/Common/DidNotCount/PrintReport/ReportFoot").bottomRight+(500,4) into SearchArea2
+	return (SearchArea1,SearchArea2) 
+end reportFootNoteSearchRectangle 

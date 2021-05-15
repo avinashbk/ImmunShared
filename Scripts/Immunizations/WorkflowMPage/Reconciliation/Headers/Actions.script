@@ -1,0 +1,14 @@
+﻿(*
+This handler builds a rectangle on the filters above the outside records table based on the filter name passed in
+@params filterName - *IMAGE* the name of the filter to build the rectangle off of
+@params desiredFilterValue - *TEXT* What you want the filter value to be
+run "Immunizations/WorkflowMPage/Reconciliation/Headers/Actions".setFilterValue filterName, desiredFilterValue
+*)
+on setFilterValue filterName, desiredFilterValue
+	set rectangle to item 2 of everyImageRectangle("Immunizations/WorkflowMPage/Reconciliation/Headers/Outside_Records_Text") + (-40, 10, 300, 160)
+	click image: filterName, SearchRectangle: rectangle
+	typeText tabKey
+	typeText spacebar
+	typeText desiredFilterValue
+	typeText returnKey
+end setFilterValue
